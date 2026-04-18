@@ -1,0 +1,200 @@
+Network & Access
+
+    SSH/FTP User: mbtc
+    SSH/FTP Password: mbtc
+    Web API Port: 8080
+    OS: Tina Linux (OpenWrt fork for Allwinner SoCs)
+
+Critical File Paths
+/mnt/SDCARD/data/framing/gcode.gc
+/mnt/SDCARD/data/framing/framing_mode.gcode (The Header/Setup)
+/mnt/SDCARD/data/framing/framing_data.gcode (The Movement/Paths)
+System Binary: /usr/bin/mbtc_creater (handling the API and G-code streaming I think)
+
+Port 8082 (Mongoose 7.17) exposes the entire root filesystem.
+
+ssh -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedAlgorithms=+ssh-rsa mbtc@192.168.0.70
+mbtc@192.168.0.70's password: mbtc
+
+
+
+
+
+
+
+
+
+
+
+
+ _____  _              __     _
+|_   _||_| ___  _ _   |  |   |_| ___  _ _  _ _
+  | |   _ |   ||   |  |  |__ | ||   || | ||_'_|
+  | |  | || | || _ |  |_____||_||_|_||___||_,_|
+  |_|  |_||_|_||_|_|  Tina is Based on OpenWrt!
+ ----------------------------------------------
+ Tina Linux (Neptune, 6191F77D)
+ ----------------------------------------------
+mbtc@mbtc_421D4F:~# strings /usr/bin/mbtc_creater | grep -E "(/process/|/device/|/camera/|/job/)"
+/device/info
+/device/heartbeat
+/device/set_config
+/device/set_device_type
+/device/set_wlan0_mac
+/device/camera/factory_upload
+/device/camera/factory_download
+/device/camera/upload
+/device/camera/download
+/device/material/upload
+/device/material/download
+/device/set_factory_sn
+/device/sys_restart
+/device/set_inverse_dis
+/device/laser_led_switch
+/camera/take_photo
+/camera/measure_distance
+/camera/get_calibration
+/camera/measure_material_thick
+/process/upload
+/process/multipart
+/process/fileupload_via_ftp
+/process/start
+/process/control
+/process/status
+/process/door_status
+/device/light/status
+/device/light/progress
+/device/light/focus_light
+/device/light/logo_light
+/device/global/cfg_peripheral_status
+/lumos/camera/start_autofocus
+/lumos/camera/stop_autofocus
+
+
+
+
+
+serial ports:
+/dev/ttyS2 seems to be the controller board for Z-axis motion control, start button supervision and the MOPA interface
+
+/dev/ttyS4 seems to be the GD32F407 in LQFP144 package. boot default baud rate seems to be 500000.
+
+the UV laser sources RS232 TX pin is level shifted and arrives at GD32F407 pin 116 (PD2). the laser sources RX pin comes from pin 113 (PC12). this matches UART5 in the STM32 context
+
+
+
+blue front LED:
+mbtc@mbtc_421D4F:~# echo 0 > /sys/class/gpio/gpio114/value
+red front LED:
+mbtc@mbtc_421D4F:~# echo 0 > /sys/class/gpio/gpio115/value
+green front LED:
+mbtc@mbtc_421D4F:~# echo 0 > /sys/class/gpio/gpio116/value
+red focus aid laser aiming front
+mbtc@mbtc_421D4F:~# echo 0 > /sys/class/gpio/gpio113/value
+red focus aid laser aiming front left
+mbtc@mbtc_421D4F:~# echo 0 > /sys/class/gpio/gpio112/value
+
+
+
+
+
+
+# killing the main process and some restarter .sh triggers some watchdog bite and all the lights in the machine go out after a moment
+ mbtc@mbtc_421D4F:~# killall mbtc_creater 
+ 
+ 
+ 
+ 
+ 
+rs232 communications with the UV source: 9600 8n1
+when starting preview tracing:
+command: SPK0\r\n
+response: 0\r\n
+when stopping preview tracing:
+command: SPK0\r\n
+response: 0\r\n
+when preparing an engraving job, before sending the gocde file or starting it:
+command: RG\r\n
+response: 1\r\n
+when sending the gcode file:
+command: SPK0\r\n
+response: 0\r\n
+when canceling the job after sending, before executing:
+command: SPK0\r\n
+response: 0\r\n
+
+
+
+
+sending $H0 to the MCU endpoint homes the Z axis and stays at home
+sending $H1 to the MCU endpoint homes the Z axis and returns to where it was before
+sending $RST to the MCU resets it
+
+other potential strings of interest:
+M134S1
+M134S0
+M33Y1
+M33Y0
+M107
+$GETID
+$GETVER
+$SH1
+$SH0
+M54S0
+M54S1
+M40S0
+M3 
+
+
+calling
+ curl -X POST http://192.168.0.70:8080/process/start 
+while the machine is waiting for a button press starts the job!
+
+
+
+Check Status: curl http://192.168.42.1:8080/process/status
+        status : 4 = Waiting / Idle
+        status : 6 = preview tracing
+        status : 2 = busy working
+        status : 3 = done but window still open / file still loaded / armed?
+        
+        
+        
+        
+tentative rs232 commands for gainlaser sources, could be or not be the same for the raycus RFL-P5-355-S-A-U source in this device, not sure yet:
+External Current Control 	SCM 1 	Returns 1
+Internal Current Control 	SCM 0 	Returns 0
+Read Diode Current 		RCR	Returns 56 (5.6A)
+
+especially tentative:
+
+Read BD Temp			RT5	Returns 3738 (37.38°C)
+Read BS Temp			RT0	
+Read LD Temp			RT1
+Read Crystal 1 Temp		RT3
+Read Crystal 2 Temp		RT4
+Read Diode Voltrage		RX2	Returns 089 (8.9V)
+Read Diode Current		RCR	Returns 86 (8.6A)
+Read Power on time		RHD	Returns 60 (60 Hours)
+Read Power setting		RCS	Returns 1000 (100%)
+Read frequency			RF	Returns 40000 (40 kHz)
+Read release time?		RFR	Returns 10 (1.0 µs)
+Read guide beam power?		RWD	Returns 06 (6%)
+Read firmware version?		RV	Returns V:6.54
+Read temp set for BS Temp	RTS0	Returns 5000
+Read temp set for LD Temp	RTS1	Returns 3300
+
+
+
+Binary States & Modes maybe?
+
+RQ	1	Laser Open (1 = Yes)
+RSS	1	Interlock (1 = OK/Closed)
+RG	1	Key Switch (1 = On)
+RSR	1	Ready (1 = Yes)
+RSM	1	Working/Enabled (1 = Yes)
+RSE	00000	Error State (0 = No Error)
+RCM	0	Mode: Internal (Current)
+RFM	2	Mode: External/FW (Frequency)
+RGM	1	Mode: External (Gate)
+RPK	2	Mode: Guide (Leakage)
