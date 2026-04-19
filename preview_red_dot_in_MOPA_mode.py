@@ -18,29 +18,34 @@ def get_md5(filename):
 def run_calibration_100mm():
     # We want a 100mm square centered at (105, 105)
 
-    gcode = f""";100mm Calibration Square
+    gcode = f""";wecreat 3.0.5-21
+;canvas border: 0 0 210 210
 M15S0
-M107X-105Y-105 ; Confirmed Center Offset
+M107X-105Y-105
+M41S0
 M19S1
-M18S1          ; Red Dot
+M42S0
+M18S0
 M11S0.2
 G90
 M3S100
 #headed
+
 M3S1000
+M11S0.005
+M38F48
+M39P200
 G0F480000
-; Drawing the Square
-G0 X55 Y55
-G1 X155 Y55 S0
-G1 X155 Y155
-G1 X55 Y155
-G1 X55 Y55
-; Center Crosshair for alignment
-G0 X100 Y105
-G1 X110 Y105
-G0 X105 Y100
-G1 X105 Y110
-M6
+G1F300000
+G0X55Y54.9F480000
+G1X155Y54.9S0F300000
+G1X155Y154.9
+G1X55Y154.9
+G1X55Y54.9
+G0X55.1Y55
+
+
+
 """
     filename = "cal_100.gc"
     with open(filename, "w") as f: f.write(gcode)
@@ -48,7 +53,7 @@ M6
 
     
     # 1. Upload
-    print(f"[*] Uploading 100mm test...")
+    print(f"Uploading test...")
     subprocess.run(["scp", "-O", "-o", "HostKeyAlgorithms=+ssh-rsa", 
                     filename, f"{SSH_USER}@{LASER_IP}:/mnt/SDCARD/data/framing/gcode.gc"], check=True)
     
@@ -57,7 +62,7 @@ M6
     payload = {"framing_file": "/mnt/SDCARD/data/framing/gcode.gc", "md5": md5}
     requests.post(f"http://{LASER_IP}:8080/lumos/dev/framing_preview_start", json=payload)
     
-    print("[+] 100mm Preview Running. Measure it! Press Ctrl+C to stop.")
+    print("Preview Running. Press Ctrl+C to stop.")
     
     try:
         while True:
@@ -65,7 +70,7 @@ M6
     except KeyboardInterrupt:
         # stop tracing
         requests.post(f"http://{LASER_IP}:8080/lumos/dev/framing_preview_stop")
-        print("\n[!] Stopped.")
+        print("\nStopped preview.")
             
 
 
