@@ -2,7 +2,7 @@
  Investigating remote control possibilities for WeCreat Lumos Ultra Laser Engraver
  
 # Notes
-
+```text
 Network & Access
 
     SSH/FTP User: mbtc
@@ -11,10 +11,10 @@ Network & Access
     OS: Tina Linux (OpenWrt fork for Allwinner SoCs)
 
 Critical File Paths
-/mnt/SDCARD/data/framing/gcode.gc
-/mnt/SDCARD/data/framing/framing_mode.gcode (The Header/Setup)
-/mnt/SDCARD/data/framing/framing_data.gcode (The Movement/Paths)
-System Binary: /usr/bin/mbtc_creater (handling the API and G-code streaming I think)
+    /mnt/SDCARD/data/framing/gcode.gc
+    /mnt/SDCARD/data/framing/framing_mode.gcode (The Header/Setup)
+    /mnt/SDCARD/data/framing/framing_data.gcode (The Movement/Paths)
+    System Binary: /usr/bin/mbtc_creater (handling the API and G-code streaming I think)
 
 Port 8082 (Mongoose 7.17) exposes the entire root filesystem.
 
