@@ -21,7 +21,7 @@ G0X105Y105                             ; Rapid move to the center of the canvas
 M25S1
 M26S1
 M24S15
-M15S0
+M15S0                                   ; Exhaust fan speed range 0 - 100
 M59A-1000B50
 M1S1                                   
 M3S1000

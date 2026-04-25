@@ -1,0 +1,39 @@
+
+M15S1
+M107X-105Y-105                         ; Sets the workspace coordinate offset to center
+M57A450B30
+M19S0                                  ; Red preview point disabled
+M18S0                                  ; UV preview point disabled?
+G90                                    ; Set to Absolute Positioning mode
+G4P1                                   ; Dwell/Pause for 1ms/s
+M46A1B0
+G0X105Y105                             ; Rapid move to the center of the canvas
+M25S1
+M26S1
+M24S15
+M15S0
+M59A-1000B50
+;M1S1                                   ; Pause execution / Wait for user "Start" signal
+M3S1000                                ; Set laser power for the starting phase [cite: 1, 3]
+M11S0.005                              ; Micro-delay for mirror stabilization [cite: 1, 3]
+M38F48                                 ; Set Laser Pulse Frequency to 48kHz [cite: 1, 3]
+M39P200                                ; Set MOPA Pulse Width to 200ns
+G0F15000                               ; Set Rapid Travel speed (250 mm/s) [cite: 1, 3]
+G1F12000                               ; Set Linear Work speed (200 mm/s) [cite: 1, 3]
+G0X55Y54.9F15000                       ; Rapid move to the bottom-left corner of the square [cite: 1, 3]
+G1X155Y54.9S10F600                     ; Draw bottom edge: 100mm at 1% power (S10) and 10 mm/s (F600) [cite: 1, 3]
+G1X155Y154.9                           ; Draw right edge: 100mm move [cite: 1, 3]
+G1X55Y154.9                            ; Draw top edge: 100mm move [cite: 1, 3]
+G1X55Y54.9                             ; Draw left edge: 100mm move [cite: 1, 3]
+G0X55.1Y55                             ; Slight rapid offset at completion [cite: 1, 3]
+
+G0X105Y105                             ; Rapid move back to center/home
+M9                                     ; Turn off auxiliary systems (Air/Coolant)
+G1 S0                                  ; Ensure laser power is set to zero
+M5                                     ; Full laser/spindle stop command
+G90                                    ; Reinforce Absolute Positioning
+M6                                     ; End of program / Tool change signal
+
+
+
+
