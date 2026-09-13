@@ -332,52 +332,6 @@ From a LightBurn `.lbdev` profile:
 
 This suggests `M18` is related to source/optical-path selection.
 
-
- _____  _              __     _
-|_   _||_| ___  _ _   |  |   |_| ___  _ _  _ _
-  | |   _ |   ||   |  |  |__ | ||   || | ||_'_|
-  | |  | || | || _ |  |_____||_||_|_||___||_,_|
-  |_|  |_||_|_||_|_|  Tina is Based on OpenWrt!
- ----------------------------------------------
- Tina Linux (Neptune, 6191F77D)
- ----------------------------------------------
-mbtc@mbtc_421D4F:~# strings /usr/bin/mbtc_creater | grep -E "(/process/|/device/|/camera/|/job/)"
-/device/info
-/device/heartbeat
-/device/set_config
-/device/set_device_type
-/device/set_wlan0_mac
-/device/camera/factory_upload
-/device/camera/factory_download
-/device/camera/upload
-/device/camera/download
-/device/material/upload
-/device/material/download
-/device/set_factory_sn
-/device/sys_restart
-/device/set_inverse_dis
-/device/laser_led_switch
-/camera/take_photo
-/camera/measure_distance
-/camera/get_calibration
-/camera/measure_material_thick
-/process/upload
-/process/multipart
-/process/fileupload_via_ftp
-/process/start
-/process/control
-/process/status
-/process/door_status
-/device/light/status
-/device/light/progress
-/device/light/focus_light
-/device/light/logo_light
-/device/global/cfg_peripheral_status
-/lumos/camera/start_autofocus
-/lumos/camera/stop_autofocus
-
-
-
 ---
 
 # Process state and job control
@@ -483,7 +437,7 @@ There is still a lot of functionality in the Lumos Ultra that has not been fully
 ---
 
 
-
+```text
  _____  _              __     _
 |_   _||_| ___  _ _   |  |   |_| ___  _ _  _ _
   | |   _ |   ||   |  |  |__ | ||   || | ||_'_|
@@ -526,3 +480,4 @@ mbtc@mbtc_421D4F:~# strings /usr/bin/mbtc_creater | grep -E "(/process/|/device/
 /device/global/cfg_peripheral_status
 /lumos/camera/start_autofocus
 /lumos/camera/stop_autofocus
+```
