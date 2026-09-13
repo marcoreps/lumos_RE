@@ -1,0 +1,6 @@
+{
+    "savepath_gcode":"/mnt/UDISK/",
+    "savepath_img":"/mnt/UDISK/",
+    "debug_mode":"1",
+    "videoid":"/dev/video0"
+}

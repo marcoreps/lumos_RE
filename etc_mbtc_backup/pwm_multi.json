@@ -1,0 +1,38 @@
+{
+    "version": 2,
+    "pwm_list": [
+        {
+            "id": "frontlight",
+            "chip": 0,
+            "channel": 5,
+            "periodns": 100000,
+            "dutyns": 90000,
+            "polarity": "inversed",
+            "enable": true
+        },
+        {
+            "id": "backlight",
+            "chip": 0,
+            "channel": 7,
+            "periodns": 100000,
+            "dutyns": 100000,
+            "polarity": "inversed",
+            "enable": true
+        },
+        {
+            "id": "servo",
+            "chip": 1,
+            "channel": 0,
+            "periodns": 20000000,
+            "dutyns": 1500000,
+            "polarity": "normal",
+            "enable": false
+        }
+    ],
+    "limits": {
+        "min_periodns": 100,
+        "max_periodns": 100000000,
+        "min_dutyns": 50,
+        "max_dutyns": 99999950
+    }
+}

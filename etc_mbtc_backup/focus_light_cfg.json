@@ -1,0 +1,12 @@
+{
+    "focus_light_list": [
+        {
+            "id": "focus_light_short",
+            "status": "on"
+        },
+        {
+            "id": "focus_light_long",
+            "status": "on"
+        }
+    ]
+}
