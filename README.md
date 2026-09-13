@@ -284,10 +284,10 @@ These pins correspond to UART5 in the STM32/GD32 peripheral mapping.
 | `$H0` | Home Z axis and remain at home |
 | `$H1` | Home Z axis and return to previous position |
 | `$RST` | Reset MCU |
-| `$GETVER` | MCU version query; raw response includes e.g. `V1:000241` |
-| `M27` | Position query |
-| `M22` | Safety/limit state query |
-| `M29` | Machine state query |
+| `$GETVER` | Doesn't work through http API, maybe only asked once during boot? |
+| `M27` | Position query returns M27 Z104.840 X0.000 U0.000 B0.000 |
+| `M22` | I thought it was the front door but it doesn't seem to be (any more?) |
+| `M29` | Returns M29S3Q1 |
 | `M15 S0..100` | Exhaust fan speed |
 | `M38 F...` | Pulse frequency, kHz |
 | `M39 P...` | Pulse width, ns |
