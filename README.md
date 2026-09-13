@@ -51,12 +51,17 @@ Example from app version `1.5.3`:
 
 ```json
 {
-  "app_version": "1.5.3",
-  "dev_type": "LU25xx",
-  "laser_id": "5w_uv",
-  "name": "wecreat",
-  "ver_mcu_1": "000241",
-  "ver_mcu_2": "120015"
+    "app_version" : "1.5.3",
+    "dev_type" : "LU25xx",
+    "hostname" : "mbtc_#####",
+    "laser_id" : "5w_uv",
+    "name" : "wecreat",
+    "sn" : "############",
+    "soc_img_buildtime" : "tina.dev.20251225.084241",
+    "ver_mcu_1" : "000241",
+    "ver_mcu_2" : "120015",
+    "wlan0_ip" : "192.168.0.70",
+    "wlan0_mac" : "AA:AA:AA:AA:AA:AA"
 }
 ```
 
@@ -390,6 +395,11 @@ There's some very annoying coil whine associated with the interior lighting, it'
 # TODO / Future investigations
 
 There is still a lot of functionality in the Lumos Ultra that has not been fully understood or exposed outside the OEM software.
+
+- [ ] **Commands**
+  - Analyze gcodes and make a dictionary
+  - Are some MCU commands only usable in gcode and others only while not processing?
+  - Find out if there is a machine family that speaks a similar language, maybe we can gcode generation in meerk40t with lowish effort?
 
 - [ ] **Camera**
   - Document the camera API and available controls
