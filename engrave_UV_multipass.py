@@ -7,7 +7,8 @@ LASER_IP = "192.168.0.70"
 STATUS_URL = "http://192.168.0.70:8080/process/status"
 SSH_USER = "mbtc"
 REMOTE_PATH = "/mnt/SDCARD/data/printing/gcode.gc"
-number_of_passes = 2
+LOCAL_PATH = "gcode/uv_10x10_square_pow100_khz48_speed1000_lines100.gc"
+number_of_passes = 30
 
 def get_laser_status():
     try:
@@ -31,11 +32,10 @@ def run_engrave_100mm():
         print(f"Error calling API: {e}")
 
 if __name__ == "__main__":
-    filename = "random_UV_gcode.gc"
     
     print(f"Uploading engraving job to {REMOTE_PATH}...")
     subprocess.run(["scp", "-O", "-o", "HostKeyAlgorithms=+ssh-rsa", 
-                    filename, f"{SSH_USER}@{LASER_IP}:{REMOTE_PATH}"], check=True)
+                    LOCAL_PATH, f"{SSH_USER}@{LASER_IP}:{REMOTE_PATH}"], check=True)
                     
     print("READY TO GO: Make sure the door is closed and safety goggles are on!")
     for i in range(number_of_passes):

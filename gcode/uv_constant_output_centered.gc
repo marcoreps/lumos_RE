@@ -1,0 +1,54 @@
+
+M15S1
+M107X-105Y-105
+M57A450B30
+M41S0
+M19S0
+M18S1
+G90
+G4P1
+M46A1B0
+G0X105Y105
+M25S1
+M26S1
+M24S15
+M15S0
+M59A0B50
+M1S1
+M3S1000
+M11S0.005
+M38F48
+G0F15000
+G1F3000
+G0X104.9Y105F15000
+
+G1 X105 Y105 S100 F1      ; S power percent 10
+G4 P1                     ; P pause seconds
+
+G1 X104.9 Y105 S200 F1    ; S power percent 20
+G4 P1                     ; P pause seconds
+
+G1 X105 Y105 S300 F1      ; S power percent 30
+G4 P1                     ; P pause seconds
+
+G1 X104.9 Y105 S400 F1    ; S power percent 40
+G4 P1                     ; P pause seconds
+
+G1 X105 Y105 S500 F1      ; S power percent 50
+G4 P1                     ; P pause seconds
+
+G1 X104.9 Y105 S600 F1    ; S power percent 60
+G4 P1                     ; P pause seconds
+
+G1 X105 Y105 S700 F1      ; S power percent 70
+G4 P1                     ; P pause seconds
+
+G0X105Y105
+M9
+G1 S0
+M5
+G90
+M6
+
+
+

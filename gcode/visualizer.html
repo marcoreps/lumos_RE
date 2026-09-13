@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumos Ultra G-Code Visualizer v2.4</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; margin: 0; display: flex; height: 100vh; background: #1e1e1e; color: #e0e0e0; }
+        #sidebar { width: 350px; padding: 20px; background: #2d2d2d; display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.5); z-index: 10;}
+        textarea { flex-grow: 1; margin-bottom: 15px; background: #1e1e1e; color: #00ff00; font-family: monospace; border: 1px solid #444; padding: 10px; resize: none; white-space: pre; overflow-wrap: normal; overflow-x: scroll;}
+        button { background: #007acc; color: white; border: none; padding: 12px; cursor: pointer; font-weight: bold; border-radius: 4px; transition: background 0.2s;}
+        button:hover { background: #0098ff; }
+        .controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        label { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+        select { background: #1e1e1e; color: white; border: 1px solid #444; padding: 6px; border-radius: 4px; font-size: 14px; cursor: pointer; width: 100%; margin-top: 2px; }
+        #canvas-container { flex-grow: 1; position: relative; overflow: hidden; background: #121212; }
+        canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+        canvas:active { cursor: grabbing; }
+        
+        /* Overlay Legend */
+        #legend { position: absolute; top: 40px; right: 20px; background: rgba(30, 30, 30, 0.85); padding: 15px; border-radius: 8px; border: 1px solid #444; pointer-events: none; width: 180px;}
+        .legend-item { display: flex; align-items: center; margin-bottom: 12px; font-size: 13px; }
+        .legend-item:last-child { margin-bottom: 0; }
+        .color-box { width: 24px; height: 4px; margin-right: 10px; flex-shrink: 0;}
+        .pause-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 14px; margin-left: 7px; background: #00ffcc; flex-shrink: 0;}
+        
+        /* Gradient Speed Bar */
+        #burn-gradient { width: 100%; height: 8px; border-radius: 4px; margin-top: 4px; }
+        .speed-labels { display: flex; justify-content: space-between; font-size: 11px; color: #aaa; margin-top: 2px;}
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <h3 style="margin-top:0;">Galvo Toolpath Analyzer v2.4</h3>
+    <div class="controls">
+        <label style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            Color Mapping Metric:
+            <select id="colorMetric" onchange="applyColorMapping(); draw();">
+                <option value="feedrate">Feedrate (F - Speed)</option>
+                <option value="power">Laser Power (S)</option>
+            </select>
+        </label>
+        <hr style="border: 0; border-top: 1px solid #444; width: 100%; margin: 5px 0;">
+        <label><input type="checkbox" id="showTravel" checked> Show Travel (G0 / S0)</label>
+        <label><input type="checkbox" id="showBurn" checked> Show Active Burn (S > 0)</label>
+        <label><input type="checkbox" id="showPause" checked> Show Dwells (G4)</label>
+    </div>
+    <textarea id="gcodeInput" spellcheck="false" placeholder="Paste your packed or spaced G-code here...">
+; Packed G-Code Example (No Spaces)
+G90
+G0X105Y105
+G0F15000
+G1F60000
+G0Y100.000
+G0X99.000F300000
+G1X100.000S0
+G1X110.080S1000
+G1X111.080S0
+G0Y100.100
+G0X99.000
+G1X100.000S0
+G1X110.080S1000F30000
+G1X111.080S0
+G4P1
+</textarea>
+    <button onclick="processGcode()">Parse & Render</button>
+</div>
+
+<div id="canvas-container">
+    <canvas id="viewCanvas"></canvas>
+    <div id="legend">
+        <div id="legend-title" style="font-size: 13px; font-weight: bold; margin-bottom: 4px;">Active Burn</div>
+        <div id="burn-gradient"></div>
+        <div class="speed-labels">
+            <span id="min-f-label">Min</span>
+            <span id="max-f-label">Max</span>
+        </div>
+        <div style="height: 12px;"></div> <div class="legend-item"><div class="color-box" style="border-top: 2px dashed #666; background: transparent;"></div>Travel (Laser OFF)</div>
+        <div class="legend-item"><div class="pause-dot"></div>Dwell / Delay (G4)</div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('viewCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('canvas-container');
+
+    const RULER_X_OFFSET = 55; 
+    const RULER_Y_OFFSET = 30; 
+
+    // Raw segments parsed from the G-code lines
+    let travelLines = [];
+    let rawBurnSegments = []; 
+    let pauses = [];
+    
+    // Aggregated structure optimized for canvas path processing
+    let burnGroups = {}; 
+    
+    let currentTransform = d3.zoomIdentity;
+    let boundingBox = { minX: 0, maxX: 0, minY: 0, maxY: 0 };
+    let dataRanges = { minF: Infinity, maxF: -Infinity, minS: Infinity, maxS: -Infinity };
+
+    function resizeCanvas() {
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        draw();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    const zoom = d3.zoom()
+        .scaleExtent([0.1, 5000]) 
+        .on('zoom', (event) => {
+            currentTransform = event.transform;
+            draw();
+        });
+    d3.select(canvas).call(zoom);
+
+    document.querySelectorAll('input[type=checkbox]').forEach(cb => cb.addEventListener('change', draw));
+
+    function processGcode() {
+        const rawText = document.getElementById('gcodeInput').value;
+        const rawLines = rawText.split('\n');
+        
+        travelLines = [];
+        rawBurnSegments = [];
+        pauses = [];
+        
+        let curX = 0, curY = 0, curS = 0, curF = 0;
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        
+        dataRanges = { minF: Infinity, maxF: -Infinity, minS: Infinity, maxS: -Infinity };
+
+        // 1. Parsing Pass
+        for (let string of rawLines) {
+            string = string.split(';')[0].trim().toUpperCase(); 
+            if (!string) continue;
+
+            const matches = Array.from(string.matchAll(/([A-Z])([+-]?\d*\.?\d+)/g));
+            if (matches.length === 0) continue;
+
+            let isMove = false;
+            let isDwell = false;
+            let nextX = curX, nextY = curY;
+
+            for (const match of matches) {
+                const letter = match[1];
+                const val = parseFloat(match[2]);
+
+                if (letter === 'G' && (val === 0 || val === 1)) isMove = true;
+                if (letter === 'G' && val === 4) isDwell = true;
+                if (letter === 'X') nextX = val;
+                if (letter === 'Y') nextY = val;
+
+                if (matches[0][1] !== 'M') {
+                    if (letter === 'F') curF = val;
+                    if (letter === 'S') curS = val;
+                }
+            }
+
+            if (isDwell) {
+                pauses.push({ x: curX, y: curY });
+            }
+
+            if (isMove && (nextX !== curX || nextY !== curY)) {
+                let isTravel = matches.some(m => m[1] === 'G' && parseFloat(m[2]) === 0) || curS === 0;
+                
+                if (isTravel) {
+                    travelLines.push({ x1: curX, y1: curY, x2: nextX, y2: nextY });
+                } else {
+                    // Update global bounds for burn states
+                    if (curF < dataRanges.minF) dataRanges.minF = curF;
+                    if (curF > dataRanges.maxF) dataRanges.maxF = curF;
+                    if (curS < dataRanges.minS) dataRanges.minS = curS;
+                    if (curS > dataRanges.maxS) dataRanges.maxS = curS;
+
+                    rawBurnSegments.push({ x1: curX, y1: curY, x2: nextX, y2: nextY, f: curF, s: curS });
+                }
+
+                if (nextX < minX) minX = nextX;
+                if (nextX > maxX) maxX = nextX;
+                if (nextY < minY) minY = nextY;
+                if (nextY > maxY) maxY = nextY;
+                
+                curX = nextX;
+                curY = nextY;
+            }
+        }
+
+        if (minX === Infinity) { minX = 0; maxX = 100; minY = 0; maxY = 100; }
+        if (dataRanges.minF === Infinity) dataRanges = { minF: 0, maxF: 1000, minS: 0, maxS: 1000 };
+        boundingBox = { minX, maxX, minY, maxY };
+
+        applyColorMapping();
+        autoCenter();
+    }
+
+    // 2. Color Mapping & Categorization Pass
+    function applyColorMapping() {
+        const metric = document.getElementById('colorMetric').value;
+        burnGroups = {};
+
+        const minVal = metric === 'feedrate' ? dataRanges.minF : dataRanges.minS;
+        const maxVal = metric === 'feedrate' ? dataRanges.maxF : dataRanges.maxS;
+
+        for (const seg of rawBurnSegments) {
+            const val = metric === 'feedrate' ? seg.f : seg.s;
+            
+            if (!burnGroups[val]) {
+                burnGroups[val] = { paths: [] };
+                
+                // Scale value to a bright blue -> red turbo spectrum offset
+                let t = (maxVal === minVal) ? 1 : (val - minVal) / (maxVal - minVal);
+                let adjustedT = 0.15 + (t * 0.85); 
+                burnGroups[val].color = d3.interpolateTurbo(adjustedT);
+            }
+            burnGroups[val].paths.push(seg);
+        }
+
+        // Update display text elements inside the legend module
+        document.getElementById('legend-title').innerText = metric === 'feedrate' ? 'Feedrate (F)' : 'Laser Power (S)';
+        const prefix = metric === 'feedrate' ? 'F' : 'S';
+        document.getElementById('min-f-label').innerText = `${prefix}${minVal}`;
+        document.getElementById('max-f-label').innerText = `${prefix}${maxVal}`;
+
+        const stops = [0, 0.25, 0.5, 0.75, 1].map(t => d3.interpolateTurbo(0.15 + (t * 0.85))).join(', ');
+        document.getElementById('burn-gradient').style.background = `linear-gradient(to right, ${stops})`;
+    }
+
+    function autoCenter() {
+        const padding = 40;
+        const dx = boundingBox.maxX - boundingBox.minX;
+        const dy = boundingBox.maxY - boundingBox.minY;
+        const cx = boundingBox.minX + dx / 2;
+        const cy = boundingBox.minY + dy / 2;
+
+        const usableWidth = canvas.width - RULER_X_OFFSET;
+        const usableHeight = canvas.height - RULER_Y_OFFSET;
+
+        const scaleX = (usableWidth - padding * 2) / (dx || 1);
+        const scaleY = (usableHeight - padding * 2) / (dy || 1);
+        const scale = Math.min(scaleX, scaleY, 100);
+
+        const transform = d3.zoomIdentity
+            .translate(RULER_X_OFFSET + usableWidth / 2, RULER_Y_OFFSET + usableHeight / 2)
+            .scale(scale)
+            .translate(-cx, cy); 
+
+        d3.select(canvas).transition().duration(750).call(zoom.transform, transform);
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // --- SUBPASS 1: RENDER TOOLPATH DATA (CLIPPED PANEL) ---
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(RULER_X_OFFSET, RULER_Y_OFFSET, canvas.width - RULER_X_OFFSET, canvas.height - RULER_Y_OFFSET);
+        ctx.clip(); 
+
+        ctx.translate(currentTransform.x, currentTransform.y);
+        ctx.scale(currentTransform.k, currentTransform.k);
+
+        const showTravel = document.getElementById('showTravel').checked;
+        const showBurn = document.getElementById('showBurn').checked;
+        const showPause = document.getElementById('showPause').checked;
+        const strokeWidth = 1 / currentTransform.k;
+
+        if (showTravel) {
+            ctx.beginPath();
+            ctx.strokeStyle = '#555555';
+            ctx.lineWidth = strokeWidth;
+            ctx.setLineDash([strokeWidth * 4, strokeWidth * 4]);
+            for (const line of travelLines) {
+                ctx.moveTo(line.x1, -line.y1);
+                ctx.lineTo(line.x2, -line.y2);
+            }
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        if (showBurn) {
+            ctx.lineWidth = strokeWidth * 2;
+            ctx.lineCap = "round";
+            for (let val in burnGroups) {
+                const group = burnGroups[val];
+                ctx.beginPath();
+                ctx.strokeStyle = group.color;
+                for (const line of group.paths) {
+                    ctx.moveTo(line.x1, -line.y1);
+                    ctx.lineTo(line.x2, -line.y2);
+                }
+                ctx.stroke();
+            }
+        }
+
+        if (showPause) {
+            ctx.fillStyle = '#00ffcc';
+            const radius = 2.5 / currentTransform.k;
+            for (const p of pauses) {
+                ctx.beginPath();
+                ctx.arc(p.x, -p.y, radius, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+        ctx.restore(); 
+
+        // --- SUBPASS 2: DRAW CALIBRATED RULERS ---
+        ctx.save();
+        ctx.font = '10px monospace';
+        ctx.fillStyle = '#aaa';
+        ctx.strokeStyle = '#444';
+        ctx.lineWidth = 1;
+
+        // A. X-Axis Ruler Band
+        ctx.fillStyle = '#252525';
+        ctx.fillRect(RULER_X_OFFSET, 0, canvas.width - RULER_X_OFFSET, RULER_Y_OFFSET);
+        ctx.beginPath();
+        ctx.moveTo(RULER_X_OFFSET, RULER_Y_OFFSET);
+        ctx.lineTo(canvas.width, RULER_Y_OFFSET);
+        ctx.stroke();
+
+        const gcodeXLeft = (RULER_X_OFFSET - currentTransform.x) / currentTransform.k;
+        const gcodeXRight = (canvas.width - currentTransform.x) / currentTransform.k;
+        const xTicks = d3.ticks(gcodeXLeft, gcodeXRight, Math.max(5, Math.floor(canvas.width / 70)));
+
+        ctx.fillStyle = '#999';
+        ctx.textAlign = 'center';
+        for (const tick of xTicks) {
+            const sx = tick * currentTransform.k + currentTransform.x;
+            if (sx < RULER_X_OFFSET) continue;
+            
+            ctx.beginPath();
+            ctx.moveTo(sx, RULER_Y_OFFSET - 6);
+            ctx.lineTo(sx, RULER_Y_OFFSET);
+            ctx.stroke();
+            ctx.fillText(Number(tick.toFixed(3)), sx, RULER_Y_OFFSET - 10);
+        }
+
+        // B. Y-Axis Ruler Band
+        ctx.fillStyle = '#252525';
+        ctx.fillRect(0, RULER_Y_OFFSET, RULER_X_OFFSET, canvas.height - RULER_Y_OFFSET);
+        ctx.beginPath();
+        ctx.moveTo(RULER_X_OFFSET, RULER_Y_OFFSET);
+        ctx.lineTo(RULER_X_OFFSET, canvas.height);
+        ctx.stroke();
+
+        const gcodeYVal1 = -(canvas.height - currentTransform.y) / currentTransform.k;
+        const gcodeYVal2 = -(RULER_Y_OFFSET - currentTransform.y) / currentTransform.k;
+        const gcodeYMin = Math.min(gcodeYVal1, gcodeYVal2);
+        const gcodeYMax = Math.max(gcodeYVal1, gcodeYVal2);
+        const yTicks = d3.ticks(gcodeYMin, gcodeYMax, Math.max(5, Math.floor(canvas.height / 50)));
+
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#999';
+        for (const tick of yTicks) {
+            const sy = -tick * currentTransform.k + currentTransform.y;
+            if (sy < RULER_Y_OFFSET) continue;
+
+            ctx.beginPath();
+            ctx.moveTo(RULER_X_OFFSET - 6, sy);
+            ctx.lineTo(RULER_X_OFFSET, sy);
+            ctx.stroke();
+            ctx.fillText(Number(tick.toFixed(3)), RULER_X_OFFSET - 10, sy + 3);
+        }
+
+        // C. Clean Corner Block Intersection
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(0, 0, RULER_X_OFFSET, RULER_Y_OFFSET);
+        ctx.fillStyle = '#00ff00';
+        ctx.textAlign = 'center';
+        ctx.fillText('mm', RULER_X_OFFSET / 2 + 2, RULER_Y_OFFSET / 2 + 4);
+        
+        ctx.restore();
+    }
+
+    resizeCanvas();
+    processGcode();
+</script>
+
+</body>
+</html>

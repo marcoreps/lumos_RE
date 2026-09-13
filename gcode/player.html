@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumos G-Code Player v1.0</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; margin: 0; display: flex; height: 100vh; background: #121212; color: #e0e0e0; overflow: hidden; }
+        
+        /* Sidebar layout */
+        #sidebar { width: 320px; padding: 20px; background: #1e1e1e; display: flex; flex-direction: column; border-right: 1px solid #333; z-index: 10; box-shadow: 2px 0 15px rgba(0,0,0,0.5);}
+        textarea { flex-grow: 1; margin-bottom: 15px; background: #0f0f0f; color: #00ffcc; font-family: monospace; font-size: 12px; border: 1px solid #333; padding: 10px; resize: none; white-space: pre; overflow-wrap: normal; overflow-x: scroll; border-radius: 4px;}
+        .btn-parse { background: #007acc; color: white; border: none; padding: 12px; cursor: pointer; font-weight: bold; border-radius: 4px; transition: 0.2s;}
+        .btn-parse:hover { background: #0098ff; }
+        
+        /* Main UI and Player */
+        #main-area { flex-grow: 1; display: flex; flex-direction: column; position: relative; }
+        #canvas-container { flex-grow: 1; position: relative; cursor: grab; background: radial-gradient(circle at center, #222 0%, #111 100%);}
+        canvas:active { cursor: grabbing; }
+        
+        /* Bottom Player Bar */
+        #player-bar { height: 60px; background: #1e1e1e; border-top: 1px solid #333; display: flex; align-items: center; padding: 0 20px; gap: 15px; }
+        
+        .play-btn { background: #444; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 16px; transition: 0.2s;}
+        .play-btn:hover { background: #555; transform: scale(1.05);}
+        .play-btn.playing { background: #ff3366; }
+        
+        /* Custom Range Slider */
+        input[type=range] { flex-grow: 1; -webkit-appearance: none; background: transparent; cursor: pointer; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: #333; border-radius: 3px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #00ffcc; margin-top: -5px; box-shadow: 0 0 10px rgba(0, 255, 204, 0.5); }
+        
+        #progress-text { font-family: monospace; font-size: 13px; color: #aaa; min-width: 130px; text-align: right;}
+        
+        select { background: #2d2d2d; color: white; border: 1px solid #444; padding: 6px; border-radius: 4px; font-size: 13px; cursor: pointer; outline: none;}
+        
+        .head-stats { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); padding: 10px 15px; border-radius: 6px; border: 1px solid #333; font-family: monospace; font-size: 13px; pointer-events: none;}
+        .stat-row { margin: 4px 0; }
+        .val { color: #00ffcc; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <h3 style="margin-top:0;">G-Code Player v1.0</h3>
+    <p style="font-size: 13px; color: #aaa; margin-top:-10px;">Temporal Toolpath Analyzer</p>
+    <textarea id="gcodeInput" spellcheck="false" placeholder="Paste G-code to animate...">
+G90
+G0X105Y105
+G0F15000
+G1F60000
+G0Y100.000
+G0X99.000F300000
+G1X100.000S0
+G1X110.080S1000
+G1X111.080S0
+G0Y100.100
+G0X99.000
+G1X100.000S0
+G1X110.080S1000F30000
+G1X111.080S0
+G0Y100.200
+G0X99.000
+G1X100.000S0
+G1X110.080S1000
+G1X111.080S0
+</textarea>
+    <button class="btn-parse" onclick="loadSequence()">Load Sequence</button>
+</div>
+
+<div id="main-area">
+    <div id="canvas-container">
+        <canvas id="viewCanvas"></canvas>
+        <div class="head-stats">
+            <div class="stat-row">X: <span id="stat-x" class="val">0.000</span></div>
+            <div class="stat-row">Y: <span id="stat-y" class="val">0.000</span></div>
+            <div class="stat-row" style="margin-top: 8px;">State: <span id="stat-mode" class="val" style="color: #ff3366;">IDLE</span></div>
+        </div>
+    </div>
+    <div id="player-bar">
+        <button id="playBtn" class="play-btn" onclick="togglePlay()">▶</button>
+        <input type="range" id="timeline" min="0" value="0" step="1" oninput="scrubTimeline()">
+        <span id="progress-text">0 / 0 cmds</span>
+        <select id="speedSelect" onchange="updateSpeed()">
+            <option value="1">1x Speed</option>
+            <option value="5" selected>5x Speed</option>
+            <option value="10">10x Speed</option>
+            <option value="25">25x Speed</option>
+            <option value="50">Max (50x)</option>
+        </select>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('viewCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('canvas-container');
+    const timeline = document.getElementById('timeline');
+    const progressText = document.getElementById('progress-text');
+    const playBtn = document.getElementById('playBtn');
+
+    // State Variables
+    let moves = []; 
+    let boundingBox = { minX: 0, maxX: 100, minY: 0, maxY: 100 };
+    let currentTransform = d3.zoomIdentity;
+    
+    // Playback Variables
+    let isPlaying = false;
+    let currentIndex = 0;
+    let framesPerTick = 5;
+    let animationId = null;
+
+    function resizeCanvas() {
+        canvas.width = container.clientWidth;
+        canvas.height = container.clientHeight;
+        renderFrame();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    const zoom = d3.zoom()
+        .scaleExtent([0.1, 5000]) 
+        .on('zoom', (event) => {
+            currentTransform = event.transform;
+            renderFrame();
+        });
+    d3.select(canvas).call(zoom);
+
+    // 1. Parsing sequentially into a flat array
+    function loadSequence() {
+        const rawText = document.getElementById('gcodeInput').value;
+        const rawLines = rawText.split('\n');
+        
+        moves = [];
+        let curX = 0, curY = 0, curS = 0;
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+
+        // Push an initial start point
+        moves.push({ x1: 0, y1: 0, x2: 0, y2: 0, type: 'start' });
+
+        for (let string of rawLines) {
+            string = string.split(';')[0].trim().toUpperCase(); 
+            if (!string) continue;
+
+            const matches = Array.from(string.matchAll(/([A-Z])([+-]?\d*\.?\d+)/g));
+            if (matches.length === 0) continue;
+
+            let isMove = false;
+            let nextX = curX, nextY = curY;
+
+            for (const match of matches) {
+                const letter = match[1];
+                const val = parseFloat(match[2]);
+
+                if (letter === 'G' && (val === 0 || val === 1)) isMove = true;
+                if (letter === 'X') nextX = val;
+                if (letter === 'Y') nextY = val;
+                if (letter === 'S' && matches[0][1] !== 'M') curS = val;
+            }
+
+            if (isMove && (nextX !== curX || nextY !== curY)) {
+                let isTravel = matches.some(m => m[1] === 'G' && parseFloat(m[2]) === 0) || curS === 0;
+                
+                moves.push({
+                    x1: curX, y1: curY, 
+                    x2: nextX, y2: nextY,
+                    type: isTravel ? 'travel' : 'burn'
+                });
+
+                if (nextX < minX) minX = nextX;
+                if (nextX > maxX) maxX = nextX;
+                if (nextY < minY) minY = nextY;
+                if (nextY > maxY) maxY = nextY;
+                
+                curX = nextX;
+                curY = nextY;
+            }
+        }
+
+        if (minX === Infinity) { minX = 0; maxX = 100; minY = 0; maxY = 100; }
+        boundingBox = { minX, maxX, minY, maxY };
+
+        // Reset player state
+        timeline.max = moves.length > 0 ? moves.length - 1 : 0;
+        timeline.value = 0;
+        currentIndex = 0;
+        pause();
+        
+        updateUI();
+        autoCenter();
+    }
+
+    function autoCenter() {
+        if (moves.length === 0) return;
+        const padding = 50;
+        const dx = boundingBox.maxX - boundingBox.minX;
+        const dy = boundingBox.maxY - boundingBox.minY;
+        const cx = boundingBox.minX + dx / 2;
+        const cy = boundingBox.minY + dy / 2;
+
+        const scaleX = (canvas.width - padding * 2) / (dx || 1);
+        const scaleY = (canvas.height - padding * 2) / (dy || 1);
+        const scale = Math.min(scaleX, scaleY, 100);
+
+        const transform = d3.zoomIdentity
+            .translate(canvas.width / 2, canvas.height / 2)
+            .scale(scale)
+            .translate(-cx, cy); // Note: Y is positive here, inverted in draw
+
+        d3.select(canvas).transition().duration(750).call(zoom.transform, transform);
+    }
+
+    // Playback Engine
+    function togglePlay() {
+        if (isPlaying) {
+            pause();
+        } else {
+            play();
+        }
+    }
+
+    function play() {
+        if (moves.length === 0) return;
+        if (currentIndex >= moves.length - 1) {
+            currentIndex = 0; // restart if at end
+        }
+        isPlaying = true;
+        playBtn.innerText = "⏸";
+        playBtn.classList.add('playing');
+        animationLoop();
+    }
+
+    function pause() {
+        isPlaying = false;
+        playBtn.innerText = "▶";
+        playBtn.classList.remove('playing');
+        cancelAnimationFrame(animationId);
+        renderFrame();
+    }
+
+    function updateSpeed() {
+        framesPerTick = parseInt(document.getElementById('speedSelect').value);
+    }
+
+    function scrubTimeline() {
+        currentIndex = parseInt(timeline.value);
+        if (!isPlaying) {
+            renderFrame();
+        }
+    }
+
+    function animationLoop() {
+        if (!isPlaying) return;
+
+        currentIndex += framesPerTick;
+        if (currentIndex >= moves.length - 1) {
+            currentIndex = moves.length - 1;
+            pause();
+        }
+
+        timeline.value = currentIndex;
+        renderFrame();
+
+        if (isPlaying) {
+            animationId = requestAnimationFrame(animationLoop);
+        }
+    }
+
+    function updateUI() {
+        progressText.innerText = `${currentIndex} / ${moves.length - 1} cmds`;
+        
+        if (moves[currentIndex]) {
+            const head = moves[currentIndex];
+            document.getElementById('stat-x').innerText = head.x2.toFixed(3);
+            document.getElementById('stat-y').innerText = head.y2.toFixed(3);
+            
+            const modeSpan = document.getElementById('stat-mode');
+            if (head.type === 'start') {
+                modeSpan.innerText = "START";
+                modeSpan.style.color = "#aaa";
+            } else if (head.type === 'travel') {
+                modeSpan.innerText = "TRAVEL (G0/S0)";
+                modeSpan.style.color = "#00ffcc";
+            } else {
+                modeSpan.innerText = "LASER FIRE (G1)";
+                modeSpan.style.color = "#ff3366";
+            }
+        }
+    }
+
+    // Core Rendering function
+    function renderFrame() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (moves.length === 0) return;
+
+        ctx.save();
+        ctx.translate(currentTransform.x, currentTransform.y);
+        ctx.scale(currentTransform.k, currentTransform.k);
+
+        const strokeWidth = 1.5 / currentTransform.k;
+        const ghostWidth = 0.5 / currentTransform.k;
+
+        // 1. Draw "Ghost" Path (The Future)
+        ctx.beginPath();
+        for (let i = 0; i < moves.length; i++) {
+            if (i === 0) { ctx.moveTo(moves[i].x2, -moves[i].y2); continue; }
+            ctx.lineTo(moves[i].x2, -moves[i].y2);
+        }
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+        ctx.lineWidth = ghostWidth;
+        ctx.stroke();
+
+        // 2. Draw "Completed" Travel Path
+        ctx.beginPath();
+        for (let i = 1; i <= currentIndex; i++) {
+            if (moves[i].type === 'travel') {
+                ctx.moveTo(moves[i].x1, -moves[i].y1);
+                ctx.lineTo(moves[i].x2, -moves[i].y2);
+            }
+        }
+        ctx.strokeStyle = "#444444";
+        ctx.lineWidth = strokeWidth;
+        ctx.setLineDash([strokeWidth * 4, strokeWidth * 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 3. Draw "Completed" Burn Path
+        ctx.beginPath();
+        for (let i = 1; i <= currentIndex; i++) {
+            if (moves[i].type === 'burn') {
+                ctx.moveTo(moves[i].x1, -moves[i].y1);
+                ctx.lineTo(moves[i].x2, -moves[i].y2);
+            }
+        }
+        ctx.strokeStyle = "#ff3366";
+        ctx.lineWidth = strokeWidth * 1.5;
+        ctx.lineCap = "round";
+        ctx.stroke();
+
+        // 4. Draw Laser Head Crosshair Current Position
+        const head = moves[currentIndex];
+        if (head) {
+            const hx = head.x2;
+            const hy = -head.y2;
+            const r = 4 / currentTransform.k;
+
+            // Crosshair lines
+            ctx.beginPath();
+            ctx.moveTo(hx - r*2, hy); ctx.lineTo(hx + r*2, hy);
+            ctx.moveTo(hx, hy - r*2); ctx.lineTo(hx, hy + r*2);
+            ctx.strokeStyle = "#00ffcc";
+            ctx.lineWidth = 0.5 / currentTransform.k;
+            ctx.stroke();
+
+            // Center glowing dot
+            ctx.beginPath();
+            ctx.arc(hx, hy, r/2, 0, Math.PI * 2);
+            ctx.fillStyle = head.type === 'burn' ? "#ff3366" : "#00ffcc";
+            ctx.fill();
+        }
+
+        ctx.restore();
+        updateUI();
+    }
+
+    // Initialize
+    resizeCanvas();
+    loadSequence();
+</script>
+
+</body>
+</html>
