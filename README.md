@@ -79,8 +79,15 @@ DXVK disabled
 
 ---
 
+# MOPA Modules
+
+The MOPA Modules I received were in unmarked compact white enclosures, not what I expected from JPT. Their are no clear identifiers internally either. But various construction details, electronic pcb layouts and component choices look identical to regular size JPT M7 MOPAs. Finally an acquaintance with a connection to JPT was able to confirm that the MOPA sources are new compact models that are currently only available for system builders on the Chinese market. So I am now very confident that genuine JPT products are delivered. Datasheets would still be very interesting to confirm if we get similar Joules and 100000 hour specified lifespans like regular size M7 boxes.
+
+---
 
 # UV source control
+
+This machine uses an unusual Raycus RFL-P5-355-S-A-U UV source with a "rear entrance" for coupling in a MOPA source.
 
 ## RS232 link
 
@@ -286,7 +293,7 @@ These pins correspond to UART5 in the STM32/GD32 peripheral mapping.
 | `$RST` | Reset MCU |
 | `$GETVER` | Doesn't work through http API, maybe only asked once during boot? |
 | `M27` | Position query returns M27 Z104.840 X0.000 U0.000 B0.000 |
-| `M22` | I thought it was the front door but it doesn't seem to be (any more?) |
+| `M22` | I thought it was door sensor but it doesn't seem to be (any more?) |
 | `M29` | Returns M29S3Q1 |
 | `M15 S0..100` | Exhaust fan speed |
 | `M38 F...` | Pulse frequency, kHz |
