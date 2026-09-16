@@ -83,6 +83,103 @@ DXVK disabled
 
 The MOPA Modules I received were in unmarked compact white enclosures, not what I expected from JPT. Their are no clear identifiers internally either. But various construction details, electronic pcb layouts and component choices look identical to regular size JPT M7 MOPAs. Finally an acquaintance with a connection to JPT was able to confirm that the MOPA sources are new compact models that are currently only available for system builders on the Chinese market. So I am now very confident that genuine JPT products are delivered. Datasheets would still be very interesting to confirm if we get similar Joules and 100000 hour specified lifespans like regular size M7 boxes.
 
+
+## MOPA Joules estimate
+
+With no detailed info available for the WeCreat MOPA modules I want to know their max impulse energy. JPTs YDFLP-E2 series for example has a quirk where the 60W YDFLP-E2-60-M7-M-R source is specified 2mJ and the 100W YDFLP-E2-100-M7-M-R is specified only 1.5mJ. To find out if this is the same for the compact white JPT MOPAs I used an older Coherent J50LP-1A pyroelectric energy sensor, originally intended for much lower frequency pulsed IR lasers. It is labelled responsivity RV(@1064nm)=1.586E+2(V/J). I expect its thermal mass to integrate absorbed energy over a few fast MOPA pulses. It's not intended for this so, grain of salt etc.
+
+### Measurement setup
+
+- **Energy sensor:** Coherent J50LP-1A pyroelectric head
+- **Responsivity:** `158.6 V/J @ 1064 nm`
+- **Oscilloscope:** Rohde & Schwarz MXO44, 1 MΩ DC input
+- Short laser vectors of varying lengths were programmed
+- The absolute peak measurements include uncertain startup behaviors so the useful quantity is the difference between sensed energy plateaus
+
+### WeCreat 100W MOPA module
+
+```text
+10 kHz
+500 ns
+S1000
+Coherent J50LP-1A
+5 shots per point
+```
+
+Measured median Vmax values:
+
+| Duration | Median Vmax | Apparent burst energy |
+|---:|---:|---:|
+| 160 µs | 492.99 mV | 3.1084 mJ |
+| 240 µs | 808.51 mV | 5.0978 mJ |
+
+The two bursts differ by **315.52 mV**:
+
+```text
+ΔE ≈ 0.31552 V / 158.6 V/J ≈ 1.99 mJ
+```
+
+**Best guesstimate: Incognito 100 W JPT: ~2.0 mJ per added gated optical pulse.**
+
+
+### WeCreat 60W MOPA module
+
+```text
+10 kHz
+500 ns
+S1000
+Coherent J50LP-1A
+5 shots per point
+```
+
+Measured median Vmax values:
+
+| Duration | Median Vmax | Apparent burst energy |
+|---:|---:|---:|
+| 150 µs | 732.54 mV | 4.6188 mJ |
+| 170 µs | 986.82 mV | 6.2221 mJ |
+
+The two bursts differ by **254.28 mV**:
+
+```text
+ΔE ≈ 0.25428 V / 158.6 V/J ≈ 1.60 mJ
+```
+
+**Best guesstimate: Incognito 60 W JPT: ~1.6 mJ per added gated optical pulse.**
+
+
+### Regular JPT YDFLP-E-60-M7-M-R
+
+For comparison I also repeated the experiment with a regular full-size JPT M7 source of "known" specification.
+This source is built into a machine with regular BJJCZ controller card, so there is some different timing behavior but same principles.
+Model: YDFLP-E-60-M7-M-R
+Specified maximum pulse energy: 1.5 mJ
+
+```text
+10 kHz
+500 ns
+S1000
+Coherent J50LP-1A
+5 shots per point
+```
+
+Measured median Vmax values:
+
+| Duration | Median Vmax | Apparent burst energy |
+|---:|---:|---:|
+| 3991.32 µs | 397.10 mV | 2.5038 mJ |
+| 4001.08 µs | 700.43 mV | 4.4163 mJ |
+
+The two bursts differ by **303.33 mV**:
+
+```text
+ΔE ≈ 0.30333 V / 158.6 V/J ≈ 1.91 mJ
+```
+
+**Best guesstimate: Regular JPT YDFLP-E-60-M7-M-R: ~1.91 mJ per added gated optical pulse.**
+
+
+
 ---
 
 # UV source control
@@ -114,8 +211,8 @@ M43S1  ->  SS 1\r\n  -> UV source powered back up
 Using the generic MCU command utility:
 
 ```bash
-./mcu_cmd.py M43S0
-./mcu_cmd.py M43S1
+python3 query_mcu.py M43S0
+python3 query_mcu.py M43S1
 ```
 
 The same firmware also adds a not yet understood new MCode:
@@ -311,7 +408,7 @@ Motion/G-code conventions:
 G0 / G1                 movement
 F value                  mm/min (mm/s * 60)
 S value                  laser power, apparently 0..1000
-G4 P1                    1 ms dwell
+G4 P1                    1 second requested dwell (verification pending)
 ```
 
 Additional strings of interest that need figuring out:
@@ -365,6 +462,14 @@ curl -X POST http://192.168.0.70:8080/process/start
 
 This will mercilessly start whatever file is "armed", so make sure there are no eyes or flammables in the working volume.
 
+Replacing the G-code file on disk is not enough: We must load/arm that
+file before start, otherwise a previous job can run. The working sequence is:
+
+1. Upload `/mnt/SDCARD/data/printing/gcode.gc`.
+2. POST `/process/fileupload_via_ftp` with the file's uppercase MD5 and the
+   arming payload used in `engrave_MOPA_mode.py`.
+3. POST `/process/start` (or press the physical start button).
+
 ---
 
 # GPIO notes
@@ -399,13 +504,39 @@ There's some very annoying coil whine associated with the interior lighting, it'
 
 ---
 
+### MOPA laser start transient / Time Constants
+
+The MOPA source needs some time to reach set output power. If lazing and mirror movement start simultaneously, the beginning of a line is tapered: `<=====`
+A better result was obtained by slowing the beam during the first ~110 µs after laser turn-on. The best discovered settings were:
+
+* startup speed: **100 mm/s**
+* startup duration: **~110 µs**
+* startup distance: **~0.011 mm**
+* normal marking speed after startup: **2400 mm/s**
+
+The best sequence for avoiding over- and under-exposure of the edges was found at S300, 48 kHz, 30 ns, 2400 mm/s final speed:
+
+```text
+unpowered lead-in at 100 mm/s
+→ laser ON at nominal vector start
+→ continue 0.011 mm at 100 mm/s (~110 µs)
+→ switch to normal marking speed
+→ laser OFF at nominal vector end
+→ unpowered lead-out
+```
+
+THis will be different at other speeds, power- and possibly pulse and frequency settings too, pretty complicated...
+It does not establish the meanings of `M57` or `M59`.
+
+---
+
 # TODO / Future investigations
 
 There is still a lot of functionality in the Lumos Ultra that has not been fully understood or exposed outside the OEM software.
 
 - [ ] **Commands**
-  - Analyze gcodes and make a dictionary
-  - Are some MCU commands only usable in gcode and others only while not processing?
+  - Analyze generated gcodes and complete the [dictionary](docs/gcode-dictionary.md)
+  - Identify what can do / query during processing
   - Find out if there is a machine family that speaks a similar language, maybe we can gcode generation in meerk40t with lowish effort?
 
 - [ ] **Camera**
@@ -413,11 +544,6 @@ There is still a lot of functionality in the Lumos Ultra that has not been fully
   - Determine whether exposure, gain, white balance, etc. can be controlled
   - Locate + document factory and user camera calibration
   - Camera-based automated research of MOPA Color engraving?!
-
-- [ ] **Workpiece height measurement**
-  - Reverse engineer the intended autofocus system using the two red focus-assist laser points
-  - Investigate `/lumos/camera/start_autofocus`, `/lumos/camera/stop_autofocus`, `/camera/measure_distance`, and related MCU commands
-  - Find out whether the unfinished/prototype autofocus implementation can be made reliable
 
 - [ ] **Manual Z-height adjustment knob**
   - Document the calibration function for it maybe
@@ -435,10 +561,12 @@ There is still a lot of functionality in the Lumos Ultra that has not been fully
   - Identify the two additional stepper-motor channels and their corresponding MCU/G-code commands.
   - Determine axis scaling, homing, limits, and accessory-detection mechanisms
 
-- [ ] **Timing compensation**
+- **Timing compensation**
+  - FW analysis has identified [M57 parameter storage and M59 queued parameters](docs/gcode-dictionary.md#timing-compensation-investigation); what do they do?
   - Laser-on, laser-off, jump, polygon or similar timing constants have to be in gcode right?
   - Is the GD32 and representation in gocde sufficiently "agile" accomodate hardware behavior perfectly?
   - Expose these parameters if possible; accurate timing is particularly important for high-pass-count precision work such as PCB structuring.
+  - What's the time resolution of the gcode planner? How long does a gcode run if it has a million calls to G4P0.000001? How long if it hasa thousand calls to G4P0.001?
 
 - [ ] **Peripherals**
   - `/device/light/get_init_value`?
@@ -451,50 +579,9 @@ There is still a lot of functionality in the Lumos Ultra that has not been fully
 - [ ] **Network/privacy behaviour**
   - What's the OEM application's downloaded `tracking.xlsx` / `tracking.db`?
 
+- [ ] **Workpiece height measurement** postponed because seemingly not yet implemented
+  - Reverse engineer the intended autofocus system using the two red focus-assist laser points
+  - Investigate `/lumos/camera/start_autofocus`, `/lumos/camera/stop_autofocus`, `/camera/measure_distance`, and related MCU commands
+  - Find out whether the unfinished/prototype autofocus implementation can be made reliable
+
 ---
-
-
-```text
- _____  _              __     _
-|_   _||_| ___  _ _   |  |   |_| ___  _ _  _ _
-  | |   _ |   ||   |  |  |__ | ||   || | ||_'_|
-  | |  | || | || _ |  |_____||_||_|_||___||_,_|
-  |_|  |_||_|_||_|_|  Tina is Based on OpenWrt!
- ----------------------------------------------
- Tina Linux (Neptune, 6191F77D)
- ----------------------------------------------
-mbtc@mbtc_421D4F:~# strings /usr/bin/mbtc_creater | grep -E "(/process/|/device/|/camera/|/job/)"
-/device/info
-/device/heartbeat
-/device/set_config
-/device/set_device_type
-/device/set_wlan0_mac
-/device/camera/factory_upload
-/device/camera/factory_download
-/device/camera/upload
-/device/camera/download
-/device/material/upload
-/device/material/download
-/device/set_factory_sn
-/device/sys_restart
-/device/set_inverse_dis
-/device/laser_led_switch
-/camera/take_photo
-/camera/measure_distance
-/camera/get_calibration
-/camera/measure_material_thick
-/process/upload
-/process/multipart
-/process/fileupload_via_ftp
-/process/start
-/process/control
-/process/status
-/process/door_status
-/device/light/status
-/device/light/progress
-/device/light/focus_light
-/device/light/logo_light
-/device/global/cfg_peripheral_status
-/lumos/camera/start_autofocus
-/lumos/camera/stop_autofocus
-```
