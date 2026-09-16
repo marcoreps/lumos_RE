@@ -205,7 +205,7 @@ G1X111.080S0
         const transform = d3.zoomIdentity
             .translate(canvas.width / 2, canvas.height / 2)
             .scale(scale)
-            .translate(-cx, cy); // Note: Y is positive here, inverted in draw
+            .translate(-cx, -cy);
 
         d3.select(canvas).transition().duration(750).call(zoom.transform, transform);
     }
@@ -303,8 +303,8 @@ G1X111.080S0
         // 1. Draw "Ghost" Path (The Future)
         ctx.beginPath();
         for (let i = 0; i < moves.length; i++) {
-            if (i === 0) { ctx.moveTo(moves[i].x2, -moves[i].y2); continue; }
-            ctx.lineTo(moves[i].x2, -moves[i].y2);
+            if (i === 0) { ctx.moveTo(moves[i].x2, moves[i].y2); continue; }
+            ctx.lineTo(moves[i].x2, moves[i].y2);
         }
         ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
         ctx.lineWidth = ghostWidth;
@@ -314,8 +314,8 @@ G1X111.080S0
         ctx.beginPath();
         for (let i = 1; i <= currentIndex; i++) {
             if (moves[i].type === 'travel') {
-                ctx.moveTo(moves[i].x1, -moves[i].y1);
-                ctx.lineTo(moves[i].x2, -moves[i].y2);
+                ctx.moveTo(moves[i].x1, moves[i].y1);
+                ctx.lineTo(moves[i].x2, moves[i].y2);
             }
         }
         ctx.strokeStyle = "#444444";
@@ -328,8 +328,8 @@ G1X111.080S0
         ctx.beginPath();
         for (let i = 1; i <= currentIndex; i++) {
             if (moves[i].type === 'burn') {
-                ctx.moveTo(moves[i].x1, -moves[i].y1);
-                ctx.lineTo(moves[i].x2, -moves[i].y2);
+                ctx.moveTo(moves[i].x1, moves[i].y1);
+                ctx.lineTo(moves[i].x2, moves[i].y2);
             }
         }
         ctx.strokeStyle = "#ff3366";
@@ -341,7 +341,7 @@ G1X111.080S0
         const head = moves[currentIndex];
         if (head) {
             const hx = head.x2;
-            const hy = -head.y2;
+            const hy = head.y2;
             const r = 4 / currentTransform.k;
 
             // Crosshair lines

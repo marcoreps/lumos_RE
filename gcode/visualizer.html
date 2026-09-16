@@ -245,7 +245,7 @@ G4P1
         const transform = d3.zoomIdentity
             .translate(RULER_X_OFFSET + usableWidth / 2, RULER_Y_OFFSET + usableHeight / 2)
             .scale(scale)
-            .translate(-cx, cy); 
+            .translate(-cx, -cy); 
 
         d3.select(canvas).transition().duration(750).call(zoom.transform, transform);
     }
@@ -273,8 +273,8 @@ G4P1
             ctx.lineWidth = strokeWidth;
             ctx.setLineDash([strokeWidth * 4, strokeWidth * 4]);
             for (const line of travelLines) {
-                ctx.moveTo(line.x1, -line.y1);
-                ctx.lineTo(line.x2, -line.y2);
+                ctx.moveTo(line.x1, line.y1);
+                ctx.lineTo(line.x2, line.y2);
             }
             ctx.stroke();
             ctx.setLineDash([]);
@@ -288,8 +288,8 @@ G4P1
                 ctx.beginPath();
                 ctx.strokeStyle = group.color;
                 for (const line of group.paths) {
-                    ctx.moveTo(line.x1, -line.y1);
-                    ctx.lineTo(line.x2, -line.y2);
+                    ctx.moveTo(line.x1, line.y1);
+                    ctx.lineTo(line.x2, line.y2);
                 }
                 ctx.stroke();
             }
@@ -300,7 +300,7 @@ G4P1
             const radius = 2.5 / currentTransform.k;
             for (const p of pauses) {
                 ctx.beginPath();
-                ctx.arc(p.x, -p.y, radius, 0, 2 * Math.PI);
+                ctx.arc(p.x, p.y, radius, 0, 2 * Math.PI);
                 ctx.fill();
             }
         }
@@ -346,8 +346,8 @@ G4P1
         ctx.lineTo(RULER_X_OFFSET, canvas.height);
         ctx.stroke();
 
-        const gcodeYVal1 = -(canvas.height - currentTransform.y) / currentTransform.k;
-        const gcodeYVal2 = -(RULER_Y_OFFSET - currentTransform.y) / currentTransform.k;
+        const gcodeYVal1 = (canvas.height - currentTransform.y) / currentTransform.k;
+        const gcodeYVal2 = (RULER_Y_OFFSET - currentTransform.y) / currentTransform.k;
         const gcodeYMin = Math.min(gcodeYVal1, gcodeYVal2);
         const gcodeYMax = Math.max(gcodeYVal1, gcodeYVal2);
         const yTicks = d3.ticks(gcodeYMin, gcodeYMax, Math.max(5, Math.floor(canvas.height / 50)));
@@ -355,7 +355,7 @@ G4P1
         ctx.textAlign = 'right';
         ctx.fillStyle = '#999';
         for (const tick of yTicks) {
-            const sy = -tick * currentTransform.k + currentTransform.y;
+            const sy = tick * currentTransform.k + currentTransform.y;
             if (sy < RULER_Y_OFFSET) continue;
 
             ctx.beginPath();
