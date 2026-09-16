@@ -81,7 +81,7 @@ DXVK disabled
 
 # MOPA Modules
 
-The MOPA Modules I received were in unmarked compact white enclosures, not what I expected from JPT. Their are no clear identifiers internally either. But various construction details, electronic pcb layouts and component choices look identical to regular size JPT M7 MOPAs. Finally an acquaintance with a connection to JPT was able to confirm that the MOPA sources are new compact models that are currently only available for system builders on the Chinese market. So I am now very confident that genuine JPT products are delivered. Datasheets would still be very interesting to confirm if we get similar Joules and 100000 hour specified lifespans like regular size M7 boxes.
+The MOPA Modules I received were in unmarked compact white enclosures, not what I expected from JPT. Their are no clear identifiers internally either. But various construction details, electronic pcb layouts and component choices look identical to regular size JPT M7 MOPAs. Finally an acquaintance with a connection to JPT was able to confirm that the MOPA sources are new  compact models that are currently only available for system builders on the Chinese market. So I am now very confident that genuine JPT products are delivered. Datasheets would still be very interesting to confirm if we get similar Joules and 100000 hour specified lifespans like regular size M7 boxes.
 
 
 ## MOPA Joules estimate
@@ -152,7 +152,9 @@ The two bursts differ by **254.28 mV**:
 
 For comparison I also repeated the experiment with a regular full-size JPT M7 source of "known" specification.
 This source is built into a machine with regular BJJCZ controller card, so there is some different timing behavior but same principles.
+
 Model: YDFLP-E-60-M7-M-R
+
 Specified maximum pulse energy: 1.5 mJ
 
 ```text
@@ -179,6 +181,29 @@ The two bursts differ by **303.33 mV**:
 **Best guesstimate: Regular JPT YDFLP-E-60-M7-M-R: ~1.91 mJ per added gated optical pulse.**
 
 
+### MOPA laser start transient / Time Constants
+
+The MOPA source needs some time to reach set output power. If lazing and mirror movement start simultaneously, the beginning of a line is tapered: `<=====`
+A better result was obtained by slowing the beam during the first ~110 µs after laser turn-on. The best discovered settings were:
+
+* startup speed: **100 mm/s**
+* startup duration: **~110 µs**
+* startup distance: **~0.011 mm**
+* normal marking speed after startup: **2400 mm/s**
+
+The best sequence for avoiding over- and under-exposure of the edges was found at S300, 48 kHz, 30 ns, 2400 mm/s final speed:
+
+```text
+unpowered lead-in at 100 mm/s
+→ laser ON at nominal vector start
+→ continue 0.011 mm at 100 mm/s (~110 µs)
+→ switch to normal marking speed
+→ laser OFF at nominal vector end
+→ unpowered lead-out
+```
+
+THis will be different at other speeds, power- and possibly pulse and frequency settings too, pretty complicated...
+It does not establish the meanings of `M57` or `M59`.
 
 ---
 
@@ -497,36 +522,7 @@ echo 0 > /sys/class/gpio/gpio113/value
 echo 0 > /sys/class/gpio/gpio112/value
 ```
 
-Killing `mbtc_creater` together with its restart mechanism eventually appears to trigger a watchdog/safety response and turns the machine's lights off.
-
-
 There's some very annoying coil whine associated with the interior lighting, it's usually noisy mirror drivers, not here! disable_interior_lights.py or old operator age takes care of that.
-
----
-
-### MOPA laser start transient / Time Constants
-
-The MOPA source needs some time to reach set output power. If lazing and mirror movement start simultaneously, the beginning of a line is tapered: `<=====`
-A better result was obtained by slowing the beam during the first ~110 µs after laser turn-on. The best discovered settings were:
-
-* startup speed: **100 mm/s**
-* startup duration: **~110 µs**
-* startup distance: **~0.011 mm**
-* normal marking speed after startup: **2400 mm/s**
-
-The best sequence for avoiding over- and under-exposure of the edges was found at S300, 48 kHz, 30 ns, 2400 mm/s final speed:
-
-```text
-unpowered lead-in at 100 mm/s
-→ laser ON at nominal vector start
-→ continue 0.011 mm at 100 mm/s (~110 µs)
-→ switch to normal marking speed
-→ laser OFF at nominal vector end
-→ unpowered lead-out
-```
-
-THis will be different at other speeds, power- and possibly pulse and frequency settings too, pretty complicated...
-It does not establish the meanings of `M57` or `M59`.
 
 ---
 
@@ -538,6 +534,7 @@ There is still a lot of functionality in the Lumos Ultra that has not been fully
   - Analyze generated gcodes and complete the [dictionary](docs/gcode-dictionary.md)
   - Identify what can do / query during processing
   - Find out if there is a machine family that speaks a similar language, maybe we can gcode generation in meerk40t with lowish effort?
+  - There should be a query that verifies whether the UV source is ready to pew pew
 
 - [ ] **Camera**
   - Document the camera API and available controls
@@ -583,5 +580,10 @@ There is still a lot of functionality in the Lumos Ultra that has not been fully
   - Reverse engineer the intended autofocus system using the two red focus-assist laser points
   - Investigate `/lumos/camera/start_autofocus`, `/lumos/camera/stop_autofocus`, `/camera/measure_distance`, and related MCU commands
   - Find out whether the unfinished/prototype autofocus implementation can be made reliable
+
+- [ ] **Subsystems
+  - mcu1 is the gcode interpreter, galvo mirror and mopa controller
+  - mcu2 is doing non-time-critical tasks such as z-height stepper control and watching the job-start-push-button
+  - we have identified some more control words and responses for the Raycus UV source. Can we maybe listen in on the rs232 communication again see if there are more new ones?
 
 ---
