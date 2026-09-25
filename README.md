@@ -476,12 +476,18 @@ These pins correspond to UART5 in the STM32/GD32 peripheral mapping.
 
 ## Z-axis layer-spacing error
 
-While optimizing 3D glass engraving, I found that the Z axis does not move in uniform increments, even when commanded with regular Z positions. External measurement shows discrete Z increments on a 5µm lattice. But individual moves can be substantially shorter or longer than requested, while the long-term average remains correct. `M27` reports these irregular increments and the physical axis follows them closely. This causes some kind of periodic interference pattern banding when viewing 3D engravings from the side.
+While optimizing 3D glass engraving, I found that the Z axis does not move in uniform increments, even when commanded with regular Z positions. External measurement shows discrete Z increments on a 5µm lattice. But individual moves can be substantially shorter or longer than requested, while the long-term average remains correct. The microcontroller in charge of the Z axis, mcu2.bin, uses a 5 µm pitch while somebody upstream in the chain of command creatively rounds to 10µm.
 
 <a href="./images/cumulative_z_error.png">
   <img src="./images/cumulative_z_error.png" width="420">
 </a>
 
+The upstream actor can be bypassed entirely and Z-commands can be injected into the RS485 bus directly with something like this for a 95.400mm command. IEEE-754 32-bit float number surrounded by some extras.
+```text
+printf '\x00\x19\x42\xBE\xCC\xCD\x03' | \
+curl -sS --data-binary @- \
+    http://192.168.0.70:8080/test/cmd/rs485
+```
 
 ---
 
