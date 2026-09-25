@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumos 3D G-Code Visualizer</title>
+    <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; margin: 0; display: flex; height: 100vh; background: #121212; color: #e0e0e0; overflow: hidden; }
+
+        #sidebar { width: 320px; padding: 20px; background: #1e1e1e; display: flex; flex-direction: column; border-right: 1px solid #333; z-index: 10; box-shadow: 2px 0 15px rgba(0,0,0,0.5); }
+        textarea { flex-grow: 1; margin-bottom: 15px; background: #0f0f0f; color: #00ffcc; font-family: monospace; font-size: 12px; border: 1px solid #333; padding: 10px; resize: none; white-space: pre; overflow-wrap: normal; overflow-x: scroll; border-radius: 4px; min-height: 200px; }
+
+        .btn-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        button { background: #007acc; color: white; border: none; padding: 12px; cursor: pointer; font-weight: bold; border-radius: 4px; transition: 0.2s; font-size: 13px; }
+        button:hover { background: #0098ff; }
+        button.secondary { background: #333; }
+        button.secondary:hover { background: #444; }
+        .btn-parse { width: 100%; }
+
+        #main-area { flex-grow: 1; display: flex; flex-direction: column; position: relative; }
+        #canvas-container { flex-grow: 1; position: relative; cursor: grab; background: radial-gradient(circle at center, #222 0%, #111 100%); }
+        #canvas-container.dragging { cursor: grabbing; }
+        canvas { display: block; }
+
+        .overlay { position: absolute; background: rgba(0,0,0,0.7); padding: 10px 15px; border-radius: 6px; border: 1px solid #333; font-family: monospace; font-size: 12px; pointer-events: none; }
+        .stats { top: 20px; left: 20px; }
+        .legend { bottom: 20px; left: 20px; line-height: 1.8; }
+        .hint { top: 20px; right: 20px; color: #aaa; }
+        .stat-row { margin: 4px 0; }
+        .val { color: #00ffcc; font-weight: bold; }
+        .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; }
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <h3 style="margin-top:0;">3D G-Code Visualizer</h3>
+    <p style="font-size: 13px; color: #aaa; margin-top:-10px;">Static point/line preview, orbit-only</p>
+    <input type="file" id="fileInput" accept=".gc,.gcode,.nc,.txt" style="display:none;">
+    <div class="btn-row">
+        <button class="secondary" style="flex:1;" onclick="document.getElementById('fileInput').click()">Load File...</button>
+    </div>
+    <textarea id="gcodeInput" spellcheck="false" placeholder="Paste G-code, or use Load File...">G90
+G0X0Y0
+G0Z0
+G5X10Y0
+G5X10Y10
+G5X0Y10
+G5X0Y0
+G0Z5
+G5X10Y0
+G5X10Y10
+G5X0Y10
+G5X0Y0
+G0Z10
+G5X10Y0
+G5X10Y10
+G5X0Y10
+G5X0Y0</textarea>
+    <button class="btn-parse" onclick="loadSequence()">Render</button>
+    <label style="display:flex; align-items:center; gap:8px; margin-top:12px; font-size:13px; color:#ccc; cursor:pointer;">
+        <input type="checkbox" id="toggleTravel" onchange="setTravelVisible(this.checked)">
+        Show travel moves (G0)
+    </label>
+    <label style="display:flex; align-items:center; gap:8px; margin-top:8px; font-size:13px; color:#ccc; cursor:pointer;">
+        <input type="checkbox" id="toggleBurnLines" checked onchange="setBurnLinesVisible(this.checked)">
+        Show lines between G5 points
+    </label>
+</div>
+
+<div id="main-area">
+    <div id="canvas-container">
+        <div class="overlay stats" id="statsBox">No data loaded</div>
+        <div class="overlay legend">
+            <div><span class="swatch" style="background:#ff3366;"></span>low Z</div>
+            <div><span class="swatch" style="background:#00ffcc;"></span>high Z</div>
+            <div><span class="swatch" style="background:#888888;"></span>travel (G0)</div>
+        </div>
+        <div class="overlay hint">Left-click + drag to rotate &bull; Scroll to zoom</div>
+    </div>
+</div>
+
+<script>
+    const fileInput = document.getElementById('fileInput');
+    const container = document.getElementById('canvas-container');
+    const statsBox = document.getElementById('statsBox');
+
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            document.getElementById('gcodeInput').value = evt.target.result;
+            loadSequence();
+        };
+        reader.readAsText(file);
+    });
+
+    // ---------- Three.js scene setup ----------
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111111);
+
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 100000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    container.appendChild(renderer.domElement);
+
+    let drawGroup = new THREE.Group();
+    scene.add(drawGroup);
+    let travelLineObj = null;
+    let burnLineObj = null;
+
+    function setTravelVisible(visible) {
+        if (travelLineObj) travelLineObj.visible = visible;
+    }
+    function setBurnLinesVisible(visible) {
+        if (burnLineObj) burnLineObj.visible = visible;
+    }
+
+    function resizeRenderer() {
+        const w = container.clientWidth, h = container.clientHeight;
+        renderer.setSize(w, h);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resizeRenderer);
+
+    // ---------- Custom orbit controls (left-click drag + wheel zoom) ----------
+    let target = new THREE.Vector3(0, 0, 0);
+    let radius = 100;
+    let theta = Math.PI / 4;   // azimuth
+    let phi = Math.PI / 3;     // polar
+    let dragging = false;
+    let lastX = 0, lastY = 0;
+
+    function updateCamera() {
+        const p = Math.min(Math.max(phi, 0.001), Math.PI - 0.001);
+        camera.position.x = target.x + radius * Math.sin(p) * Math.sin(theta);
+        camera.position.y = target.y + radius * Math.cos(p);
+        camera.position.z = target.z + radius * Math.sin(p) * Math.cos(theta);
+        camera.lookAt(target);
+    }
+
+    renderer.domElement.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0) return;
+        dragging = true;
+        lastX = e.clientX; lastY = e.clientY;
+        container.classList.add('dragging');
+    });
+    window.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const dx = e.clientX - lastX, dy = e.clientY - lastY;
+        lastX = e.clientX; lastY = e.clientY;
+        theta -= dx * 0.006;
+        phi -= dy * 0.006;
+        updateCamera();
+    });
+    window.addEventListener('pointerup', () => {
+        dragging = false;
+        container.classList.remove('dragging');
+    });
+    renderer.domElement.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        radius *= (1 + e.deltaY * 0.001);
+        radius = Math.min(Math.max(radius, 0.01), 1e6);
+        updateCamera();
+    }, { passive: false });
+
+    // ---------- G-code parsing ----------
+    // Coordinate mapping: three.x = gcode X, three.y = gcode Z (height, "up"), three.z = gcode Y (depth)
+    function parseGCode(text) {
+        const lines = text.split('\n');
+        let curX = 0, curY = 0, curZ = 0, curS = 0;
+        let mode = 'G0';
+        const segments = [];
+        const travelSegments = [];
+
+        for (let raw of lines) {
+            let line = raw.split(';')[0].trim().toUpperCase();
+            if (!line) continue;
+
+            const matches = Array.from(line.matchAll(/([A-Z])([+-]?\d*\.?\d+)/g));
+            if (matches.length === 0) continue;
+
+            let hasX = false, hasY = false, hasZ = false;
+            let nextX = curX, nextY = curY, nextZ = curZ;
+            let lineS = null;
+
+            for (const m of matches) {
+                const letter = m[1];
+                const val = parseFloat(m[2]);
+                if (letter === 'G' && (val === 0 || val === 1 || val === 5)) mode = 'G' + val;
+                if (letter === 'X') { nextX = val; hasX = true; }
+                if (letter === 'Y') { nextY = val; hasY = true; }
+                if (letter === 'Z') { nextZ = val; hasZ = true; }
+                if (letter === 'S') lineS = val;
+            }
+            if (lineS !== null) curS = lineS;
+            if (!hasX && !hasY && !hasZ) continue;
+
+            const moved = (nextX !== curX || nextY !== curY || nextZ !== curZ);
+            if (moved) {
+                const isDraw = (mode === 'G5') || (mode === 'G1' && curS !== 0);
+                if (isDraw) {
+                    segments.push({ x1: curX, y1: curY, z1: curZ, x2: nextX, y2: nextY, z2: nextZ });
+                } else {
+                    travelSegments.push({ x1: curX, y1: curY, z1: curZ, x2: nextX, y2: nextY, z2: nextZ });
+                }
+                curX = nextX; curY = nextY; curZ = nextZ;
+            }
+        }
+        return { segments, travelSegments };
+    }
+
+    function heatColor(t) {
+        // low Z -> pink (#ff3366), high Z -> cyan (#00ffcc), matching app theme
+        const c1 = new THREE.Color(0xff3366);
+        const c2 = new THREE.Color(0x00ffcc);
+        return c1.clone().lerp(c2, t);
+    }
+
+    function makeTextSprite(text, hexColor) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 64; canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = hexColor;
+        ctx.font = 'bold 48px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, 32, 34);
+        const tex = new THREE.CanvasTexture(canvas);
+        const mat = new THREE.SpriteMaterial({ map: tex, depthTest: false });
+        const sprite = new THREE.Sprite(mat);
+        return sprite;
+    }
+
+    function loadSequence() {
+        const text = document.getElementById('gcodeInput').value;
+        const { segments, travelSegments } = parseGCode(text);
+        travelLineObj = null;
+        burnLineObj = null;
+
+        // Clear previous geometry
+        while (drawGroup.children.length) {
+            const obj = drawGroup.children.pop();
+            if (obj.geometry) obj.geometry.dispose();
+            if (obj.material) obj.material.dispose();
+        }
+
+        if (segments.length === 0) {
+            statsBox.innerHTML = 'No drawn (laser-on) moves found';
+            renderer.render(scene, camera);
+            return;
+        }
+
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity, minZ = Infinity, maxZ = -Infinity;
+        for (const s of segments) {
+            minX = Math.min(minX, s.x1, s.x2); maxX = Math.max(maxX, s.x1, s.x2);
+            minY = Math.min(minY, s.y1, s.y2); maxY = Math.max(maxY, s.y1, s.y2);
+            minZ = Math.min(minZ, s.z1, s.z2); maxZ = Math.max(maxZ, s.z1, s.z2);
+        }
+        const zRange = (maxZ - minZ) || 1;
+
+        // Build line segments (mapped x,z(height),y)
+        const linePositions = [];
+        const lineColors = [];
+        const pointPositions = [];
+        const pointColors = [];
+
+        for (const s of segments) {
+            const t1 = (s.z1 - minZ) / zRange;
+            const t2 = (s.z2 - minZ) / zRange;
+            const c1 = heatColor(t1), c2 = heatColor(t2);
+
+            linePositions.push(s.x1, s.z1, s.y1, s.x2, s.z2, s.y2);
+            lineColors.push(c1.r, c1.g, c1.b, c2.r, c2.g, c2.b);
+
+            pointPositions.push(s.x1, s.z1, s.y1);
+            pointColors.push(c1.r, c1.g, c1.b);
+            pointPositions.push(s.x2, s.z2, s.y2);
+            pointColors.push(c2.r, c2.g, c2.b);
+        }
+
+        const lineGeom = new THREE.BufferGeometry();
+        lineGeom.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+        lineGeom.setAttribute('color', new THREE.Float32BufferAttribute(lineColors, 3));
+        const lineMat = new THREE.LineBasicMaterial({ vertexColors: true });
+        burnLineObj = new THREE.LineSegments(lineGeom, lineMat);
+        burnLineObj.visible = document.getElementById('toggleBurnLines').checked;
+        drawGroup.add(burnLineObj);
+
+        const pointGeom = new THREE.BufferGeometry();
+        pointGeom.setAttribute('position', new THREE.Float32BufferAttribute(pointPositions, 3));
+        pointGeom.setAttribute('color', new THREE.Float32BufferAttribute(pointColors, 3));
+        const diag = Math.max(maxX - minX, maxY - minY, zRange, 0.001);
+        const pointMat = new THREE.PointsMaterial({ vertexColors: true, size: diag * 0.006, sizeAttenuation: true });
+        drawGroup.add(new THREE.Points(pointGeom, pointMat));
+
+        // Travel (G0) moves, shown in faint gray, toggled via the sidebar checkbox
+        if (travelSegments.length > 0) {
+            const travelPositions = [];
+            for (const s of travelSegments) {
+                travelPositions.push(s.x1, s.z1, s.y1, s.x2, s.z2, s.y2);
+            }
+            const travelGeom = new THREE.BufferGeometry();
+            travelGeom.setAttribute('position', new THREE.Float32BufferAttribute(travelPositions, 3));
+            const travelMat = new THREE.LineBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.4 });
+            travelLineObj = new THREE.LineSegments(travelGeom, travelMat);
+            travelLineObj.visible = document.getElementById('toggleTravel').checked;
+            drawGroup.add(travelLineObj);
+        }
+
+        // Grid on the gcode XY plane ("bed"), sitting at min Z
+        const gridSize = Math.max(maxX - minX, maxY - minY, 1) * 1.4;
+        const grid = new THREE.GridHelper(gridSize, 20, 0x444444, 0x2a2a2a);
+        grid.position.set((minX + maxX) / 2, minZ, (minY + maxY) / 2);
+        drawGroup.add(grid);
+
+        // Local axis indicator at the corner of the bounding box
+        const axisLen = diag * 0.3;
+        const corner = new THREE.Vector3(minX, minZ, minY);
+        const axisDefs = [
+            { dir: new THREE.Vector3(1, 0, 0), color: 0xff4444, label: 'X' },
+            { dir: new THREE.Vector3(0, 1, 0), color: 0x44ff44, label: 'Z' }, // gcode Z (height)
+            { dir: new THREE.Vector3(0, 0, 1), color: 0x4488ff, label: 'Y' }  // gcode Y (depth)
+        ];
+        for (const ax of axisDefs) {
+            const end = corner.clone().addScaledVector(ax.dir, axisLen);
+            const geom = new THREE.BufferGeometry().setFromPoints([corner, end]);
+            const mat = new THREE.LineBasicMaterial({ color: ax.color });
+            drawGroup.add(new THREE.Line(geom, mat));
+
+            const sprite = makeTextSprite(ax.label, '#' + ax.color.toString(16).padStart(6, '0'));
+            sprite.position.copy(end).addScaledVector(ax.dir, axisLen * 0.15);
+            const spriteScale = diag * 0.06;
+            sprite.scale.set(spriteScale, spriteScale, spriteScale);
+            drawGroup.add(sprite);
+        }
+
+        // Frame the camera on the data
+        target.set((minX + maxX) / 2, (minZ + maxZ) / 2, (minY + maxY) / 2);
+        radius = diag * 2.2 + 5;
+        theta = Math.PI / 4;
+        phi = Math.PI / 3;
+        updateCamera();
+
+        statsBox.innerHTML = `
+            <div class="stat-row">Points: <span class="val">${segments.length * 2}</span></div>
+            <div class="stat-row">X: <span class="val">${minX.toFixed(3)} &ndash; ${maxX.toFixed(3)}</span></div>
+            <div class="stat-row">Y: <span class="val">${minY.toFixed(3)} &ndash; ${maxY.toFixed(3)}</span></div>
+            <div class="stat-row">Z: <span class="val">${minZ.toFixed(3)} &ndash; ${maxZ.toFixed(3)}</span></div>
+        `;
+
+        renderer.render(scene, camera);
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+    }
+
+    // Initialize
+    resizeRenderer();
+    updateCamera();
+    loadSequence();
+    animate();
+</script>
+
+</body>
+</html>
