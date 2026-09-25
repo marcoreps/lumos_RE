@@ -257,6 +257,29 @@ M41S1 -> SPK0\r\n
 
 This appears to control the UV source's equivalent of "first pulse killer" or something like that?
 
+
+
+## UV 3D glass engraving
+
+The 355nm laser supports subsurface engraving. Together with the motorized Z-axis we can embed 3D models in glass blocks!
+
+OEM-Software-generated jobs show:
+
+```text
+M18S2          select 355 nm UV
+M38F80         80 kHz
+G5T70S1000     configure subsurface point marking
+G5X...Y...     emit one crystal voxel
+```
+
+For a 90mm tall glass block on OEM default riser with refractive index n=1.516:
+
+```text
+glass top Zmachine = 99.400 mm
+
+Zmachine = 99.400 - depth / 1.516
+```
+
 ---
 
 
@@ -283,12 +306,59 @@ Files seen in the last few months:
     https://package.wecreat.com/lumos-pro/b698c91f4f73260f9c56488abee08d82.tar.gz
     https://package.wecreat.com/lumos-pro/679d452c15a3f9876959465f006944e3.tar.gz
     https://package.wecreat.com/lumos-pro/ed658bb4e05c5a341dca7c98ba14b955.tar.gz
+    https://package.wecreat.com/lumos-pro/86b535bca1f48390a4baf7be0c42cf7d.tar.gz
 
 ```
 After flashing firmware with manual_firmware_update.py, a power cycle is needed for the machine to report íts new versions. Careful here, brickage likely not impossible.
 
 
 ---
+
+
+# G-code file retention / descriptor leak
+
+`mbtc_creater` appears to stream `gcode.gc` from disk, but does not close old files when its done.
+
+```text
+current job:
+  /mnt/SDCARD/data/printing/gcode.gc
+
+after completion / replacement:
+  /mnt/SDCARD/data/printing/gcode.gc (deleted)
+```
+
+Old jobs remain referenced through `/proc/<mbtc_creater PID>/fd/` as deleted-but-open files.
+
+Repeated large jobs can accumulate hidden storage usage even though `/mnt/SDCARD/data/printing` appears empty.
+
+Useful inspection commands:
+
+```sh
+PID=$(pidof mbtc_creater)
+
+ls -l /proc/$PID/fd | grep gcode
+
+for f in /proc/$PID/fd/*; do
+    target=$(readlink "$f")
+    case "$target" in
+        *gcode.gc*)
+            ls -liL "$f"
+            cat /proc/$PID/fdinfo/${f##*/}
+            ;;
+    esac
+done
+```
+
+The active job's `fdinfo` `pos:` value also advances during engraving providing a simple playback-progress bar.
+
+For very large jobs I would recommend multiple resumable Z slice rather than one ginormous file. And a restart occasionally maybe.
+
+
+
+---
+
+
+
 
 # Local HTTP API
 
@@ -401,6 +471,17 @@ UV RX <- level shifter <- GD32F407 pin 113 / PC12
 ```
 
 These pins correspond to UART5 in the STM32/GD32 peripheral mapping.
+
+
+
+## Z-axis layer-spacing error
+
+While optimizing 3D glass engraving, I found that the Z axis does not move in uniform increments, even when commanded with regular Z positions. External measurement shows discrete Z increments on a 5µm lattice. But individual moves can be substantially shorter or longer than requested, while the long-term average remains correct. `M27` reports these irregular increments and the physical axis follows them closely. This causes some kind of periodic interference pattern banding when viewing 3D engravings from the side.
+
+<a href="./images/cumulative_z_error.png">
+  <img src="./images/cumulative_z_error.png" width="420">
+</a>
+
 
 ---
 
