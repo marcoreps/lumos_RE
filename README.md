@@ -478,9 +478,15 @@ These pins correspond to UART5 in the STM32/GD32 peripheral mapping.
 
 While optimizing 3D glass engraving, I found that the Z axis does not move in uniform increments, even when commanded with regular Z positions. External measurement shows discrete Z increments on a 5µm lattice. But individual moves can be substantially shorter or longer than requested, while the long-term average remains correct. The microcontroller in charge of the Z axis, mcu2.bin, uses a 5 µm pitch while somebody upstream in the chain of command creatively rounds to 10µm.
 
-<a href="./images/cumulative_z_error.png">
-  <img src="./images/cumulative_z_error.png" width="420">
-</a>
+| From above | From the side |
+| --- | --- |
+| <a href="./images/3d_glass_fine_tuned_from_above.jpg"><img src="./images/3d_glass_fine_tuned_from_above.jpg" width="320"></a> | <a href="./images/3d_glass_fine_tuned_side_banding_Z_axis_problem.jpg"><img src="./images/3d_glass_fine_tuned_side_banding_Z_axis_problem.jpg" width="320"></a> |
+| Engraving looks clean along the Z axis. | Periodic layer-spacing errors become visible from the side. |
+
+| Normal Z-command path | Direct RS485 injection |
+| --- | --- |
+| <a href="./images/cumulative_z_error.png"><img src="./images/cumulative_z_error.png" width="320"></a> | <a href="./images/cumulative_z_error_with_direct_rs485_injection.png"><img src="./images/cumulative_z_error_with_direct_rs485_injection.png" width="320"></a> |
+| Large, sharp layer-to-layer jumps are superimposed on the slower mechanical Z error. | Bypassing the upstream command chain removes the large jumps, exposing the underlying cyclic mechanical error. |
 
 The upstream actor can be bypassed entirely and Z-commands can be injected into the RS485 bus directly with something like this for a 95.400mm command. IEEE-754 32-bit float number surrounded by some extras.
 ```text
