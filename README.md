@@ -67,7 +67,7 @@ Example from app version `1.5.3`:
 
 ## OEM software on Linux
 
-The Windows WeCreat MakeIt application is Electron-based and can run under Bottles/Wine.
+The Windows WeCreat MakeIt application is Electron-based and can run under Bottles/Wine. I don't see why anybody would want it to but hey...
 
 A currently known-working combination is:
 
@@ -285,11 +285,12 @@ Zmachine = 99.400 - depth / 1.516
 
 # Firmware update notes
 
-Vendor update feeds:
+OEM update feeds:
 
 ```text
 https://package.wecreat.com/lumos-pro/test.txt
 https://package.wecreat.com/lumos-pro/dev.txt
+https://package.wecreat.com/lumos-pro/release.txt I expect stable firmware update releases to appear here soon
 ( https://package.wecreat.com/lumos-pro/version.json )
 ```
 
@@ -307,6 +308,9 @@ Files seen in the last few months:
     https://package.wecreat.com/lumos-pro/679d452c15a3f9876959465f006944e3.tar.gz
     https://package.wecreat.com/lumos-pro/ed658bb4e05c5a341dca7c98ba14b955.tar.gz
     https://package.wecreat.com/lumos-pro/86b535bca1f48390a4baf7be0c42cf7d.tar.gz
+    https://package.wecreat.com/lumos-pro/8485125a04e7c20e6015f91600a8a790.tar.gz
+    https://package.wecreat.com/lumos-pro/e9d4ee2b7800910d546a489ea29e20ab.tar.gz
+    https://package.wecreat.com/lumos-pro/0d2c9943cd692dbfa616e01f96b6832c.tar.gz
 
 ```
 After flashing firmware with manual_firmware_update.py, a power cycle is needed for the machine to report íts new versions. Careful here, brickage likely not impossible.
