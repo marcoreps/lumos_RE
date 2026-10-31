@@ -1,0 +1,2 @@
+pitch_um,pass,n,mean_m27_step_um,mean_physical_step_um,m27_step_std_um,physical_step_std_um,m27_vs_parker_r,parker_minus_m27_mean_um,parker_minus_m27_rms_um,m27_error_rms_um,physical_error_rms_um,final_cumulative_error_um
+20.0,1,5,20.000000000000284,20.59649658203125,3.480934286106927e-12,0.5178889151219965,-0.4762764899042984,0.5964965820309658,0.7899475303984312,3.492518126064541e-12,0.7899475303975589,2.98248291015625

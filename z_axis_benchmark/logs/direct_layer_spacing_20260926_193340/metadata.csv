@@ -1,0 +1,22 @@
+key,value
+script_version,2026-09-26-direct-layer-spacing-v1
+timestamp,2026-09-26T19:33:40.227+02:00
+mode,direct_rs485
+pitch_um,20.0
+requested_span_mm,1.0
+intervals,50
+effective_span_um,1000.0
+passes,2
+startup_m27_z_mm,74.465
+startup_m27_raw,M27 Z74.465 X0.000 U0.000 B0.000
+direct_anchor_z_mm,74.465
+direct_anchor_count,14893
+start_z_mm,73.965
+preload_z_mm,73.665
+mcu2_um_per_count,5.0
+rs485_url,http://192.168.0.70:8080/test/cmd/rs485
+parker_zero_count,1073774679
+parker_baseline_std_um,0.009411328193401004
+parker_baseline_pp_um,0.04669189453125
+run_status,completed
+run_end_timestamp,2026-09-26T19:36:15.059+02:00

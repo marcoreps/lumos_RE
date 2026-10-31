@@ -1,0 +1,15 @@
+key,value
+script_version,2026-09-25-direct-mcu2-1
+timestamp,2026-09-25T23:55:34.370+02:00
+rs485_url,http://192.168.0.70:8080/test/cmd/rs485
+mcu2_counts_per_mm,200
+mcu2_um_per_count,5.0
+pitches_um,5.0 10.0 20.0 40.0
+span_mm,1.0
+passes,1
+python,"3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]"
+platform,Linux-7.0.7-070007-generic-x86_64-with-glibc2.43
+pytrinamic,0.2.25
+run_status,error
+run_end_timestamp,2026-09-25T23:55:35.441+02:00
+run_error,RuntimeError('Could not find MCU2 position response 00 08 in HTTP reply: 7b 0a 09 22 63 6f 64 65 22 20 3a 20 30 2c 0a 09 22 64 61 74 61 22 20 3a 20 22 22 2c 0a 09 22 72 65 73 75 6c 74 22 20 3a 20 30 0a 7d')

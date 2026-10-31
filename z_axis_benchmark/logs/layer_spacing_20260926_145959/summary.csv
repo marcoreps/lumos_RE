@@ -1,0 +1,16 @@
+metric,value,unit
+pass_1_mean_spacing_um,19.6685107421875,um
+pass_1_spacing_std_um,4.521455947978421,um
+pass_1_min_spacing_um,8.99322509765625,um
+pass_1_max_spacing_um,30.28839111328125,um
+pass_1_spacing_peak_to_peak_um,21.295166015625,um
+pass_1_step_error_rms_um,4.533591183328568,um
+pass_1_scale_error_ppm,-16574.46289062503,ppm
+pass_2_mean_spacing_um,19.674703369140627,um
+pass_2_spacing_std_um,4.559393858455702,um
+pass_2_min_spacing_um,8.975830078125,um
+pass_2_max_spacing_um,31.07635498046875,um
+pass_2_spacing_peak_to_peak_um,22.10052490234375,um
+pass_2_step_error_rms_um,4.570983510643201,um
+pass_2_scale_error_ppm,-16264.831542968761,ppm
+pass_1_vs_2_step_error_correlation,0.9921690170092309,Pearson r

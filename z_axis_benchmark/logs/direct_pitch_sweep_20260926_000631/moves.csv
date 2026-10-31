@@ -1,0 +1,1 @@
+timestamp,elapsed_s,pitch_um,pass,phase,from_count,to_count,from_z_mm,to_z_mm,command_delta_um,encoded_float_mm,rs485_body_hex,http_ack,encoder_before,encoder_after,encoder_delta_raw_um,settle_total_s,stable_span_um

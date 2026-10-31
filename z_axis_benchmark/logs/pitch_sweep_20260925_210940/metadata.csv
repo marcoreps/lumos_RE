@@ -1,0 +1,23 @@
+key,value
+script_version,2026-09-25.1-pitch-sweep
+timestamp,2026-09-25T21:09:40.487913+02:00
+python_version,"3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]"
+platform,Linux-7.0.7-070007-generic-x86_64-with-glibc2.43
+pytrinamic_version,0.2.25
+pitches_um,"[5.0, 10.0, 20.0, 40.0]"
+span_mm,1.0
+passes,1
+preload_mm,0.3
+feed_mm_min,60.0
+reposition_feed_mm_min,600.0
+sample_time_s,0.075
+settle_guard_s,0.075
+settle_time_s,0.15
+settle_threshold_um,0.1
+encoder_pitch_um,20.0
+encoder_um_per_count,0.00030517578125
+initial_lumos_z_mm,95.27
+run_zero_count,1073774588
+initial_encoder_std_um,0.0019544257010199032
+run_status,completed
+run_end_timestamp,2026-09-25T21:25:30.301627+02:00
