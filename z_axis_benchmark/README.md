@@ -38,7 +38,7 @@ Both experiments used the normal G-code command path, not direct RS485 injection
 | Settling guard / stable window | 0.1 / 0.2 s |
 | Stability acceptance | ≤ 0.1 µm peak-to-peak |
 
-The "before" run was `logs/layer_spacing_20260925_190700` (initial reported Lumos Z: `90.290 mm`). The "after" run with all optimizations is `logs/layer_spacing_20261031_130351` (first commanded layer position: `60.390 mm`).
+The "before" run was `logs/layer_spacing_20260925_190700` (initial reported Lumos Z: `90.290 mm`). The "after" run is **`logs/layer_spacing_20261101_132445`** (initial reported Lumos Z: `67.845 mm`). The rebuilt machine was warmed up, and the Parker's base plate was attached to the moving Z assembly while its slider rested on the optical breadboard supporting the engraver.
 
 ## Hardware upgrades
 
@@ -52,12 +52,6 @@ The Z chain of command in the machine is roughly:
 ```text
 G-code -> file system on single board computer -> MCU1 -> RS485 -> MCU2 -> pulses to stepper drivers
 ```
+The Z-lift MCU2 accepts absolute positions on a 5 µm grid, but the original normal MCU1 G-code processor sends values truncated to a 10 µm grid. Direct RS485 command `0x0019` could bypass that upstream conversion.
 
-The lift MCU2 accepts absolute positions on a 5 µm grid, but the original normal MCU1 G-code processor sends values truncated to a 10 µm grid. Direct RS485 command `0x0019` could bypass that upstream conversion.
-
-
-After LLM-assisted firmware patch, a normal-G-code **17 µm** sweep on October 31 reported **15/20 µm increments**, consistent with the expected 5 µm position lattice, and the external encoder followed those commands. That is strong behavioral evidence that the old upstream 10 µm quantization was corrected, although it is not a fresh RS485 packet capture.
-
-The **matched 20 µm sweep alone cannot test that quantization bug**, because 20 µm is divisible by both the 5 and 10 µm grids. Likewise, these results do not separate the effect of changing the screw lead, rails, firmware, mounting geometry, or the Z measurement region.
-
-
+After LLM-assisted firmware patch, a normal-G-code **17 µm** sweep on October 31 reported 15/20 µm increments, consistent with the expected 5 µm position resolution, and the external encoder followed those commands.
