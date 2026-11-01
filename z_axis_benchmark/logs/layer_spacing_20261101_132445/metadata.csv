@@ -1,0 +1,27 @@
+key,value
+script_version,2026-09-25.1-layer-spacing
+timestamp,2026-11-01T13:24:45.868221+01:00
+python_version,"3.14.4 (main, Aug 20 2026, 10:41:58) [GCC 15.2.0]"
+platform,Linux-7.0.7-070007-generic-x86_64-with-glibc2.43
+pytrinamic_version,0.2.25
+pitch_um,20.0
+span_mm,5.0
+passes,2
+direction,positive
+preload_mm,0.3
+measurement_feed_mm_min,60.0
+reposition_feed_mm_min,600.0
+sample_time_s,0.1
+settle_guard_s,0.1
+settle_time_s,0.2
+settle_threshold_um,0.1
+encoder_pitch_um,20.0
+encoder_counts_per_pitch,65536.0
+encoder_um_per_count,0.00030517578125
+initial_lumos_z_mm,67.845
+run_zero_encoder_count,1073774574
+initial_encoder_std_um,0.004911923740104612
+initial_encoder_pp_um,0.02410888671875
+run_status,completed
+run_end_timestamp,2026-11-01T13:46:27.662902+01:00
+detected_encoder_sign,1.0
