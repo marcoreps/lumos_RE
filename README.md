@@ -480,7 +480,7 @@ These pins correspond to UART5 in the STM32/GD32 peripheral mapping.
 
 ## [Z-axis layer-spacing error](./z_axis_benchmark/)
 
-<a href="./images/cumulative_z_error.png"><img src="./images/cumulative_z_error.png"></a>
+<a href="./images/layer_spacing_factory.png"><img src="./images/layer_spacing_factory.png"></a>
 
 While investigating periodic banding in 3D glass engravings, I discovered both a firmware positioning bug and mechanical problems in the Z-axis lift. After modifications, layer-spacing errors were reduced by approximately a factor of eight. The [full story](./z_axis_benchmark/) includes reverse engineering, mechanical mods, and raw data.
 

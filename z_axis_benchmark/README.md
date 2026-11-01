@@ -6,6 +6,10 @@ I found and fixed a firmware bug, replaced the linear rail carriages, and replac
 
 ## The before/after
 
+<a href="./images/layer_spacing_factory.png"><img src="./images/layer_spacing_factory.png"></a>
+
+<a href="./images/layer_spacing_improved.png"><img src="./images/layer_spacing_improved.png"></a>
+
 | Layer-spacing metric | Factory pass 1 | Factory pass 2 | Modified pass 1 | Modified pass 2 |
 |:--|--:|--:|--:|--:|
 | Mean physical increment | 19.931 µm | 19.939 µm | 19.898 µm | 19.952 µm |
