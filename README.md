@@ -224,7 +224,7 @@ CRLF-terminated ASCII commands
 ```
 ## UV standby / pump control
 
-This was the main reason for this project. The older firmware left the UV source fully pumped whenever the engraver was powered on, even while using only the MOPA module. That caused roughly 100 W of unnecessary power consumption, cooling-fan noise, and unnecessary UV pump/crystal wear. After flashing ed658bb4e05c5a341dca7c98ba14b955.tar.gz on September 13 2026 using manual_firmware_update.py I am able to run query_mcu.py M43S0 to power down the UV laser source and query_mcu.py M43S1 to power it back up. Internally I believe this translates to mcu1 sending SS 0 or SS 1 to the UV source via RS232. Awesome!
+This was the main reason for this project. The older firmware left the UV source fully pumped whenever the engraver was powered on, even while using only the MOPA module. That caused roughly 100 W of unnecessary power consumption, cooling-fan noise, and unnecessary UV pump/crystal wear. (Frequently cylcing the diode power is potentially also harmful.) After flashing ed658bb4e05c5a341dca7c98ba14b955.tar.gz on September 13 2026 using manual_firmware_update.py I am able to run query_mcu.py M43S0 to power down the UV laser source and query_mcu.py M43S1 to power it back up. Internally I believe this translates to mcu1 sending SS 0 or SS 1 to the UV source via RS232. Awesome!
 
 The dev firmware containing MCU1 version `000241` adds a new `M43` handler:
 
