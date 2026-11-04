@@ -3,6 +3,13 @@
 
 ---
 
+## Acute bricking and data loss risk
+
+Cutting power to the Allwinner SoC SBPC at unfortunate times can make the whole machine inoperable and cause loss of data that is available nowhere.
+On mine the writable UBIFS overlay failed to mount, so the normal application and SSH didn't start. I had to go through a time-consuming reovery and fs repair mission over a UART PCB header.
+Maybe send a quick 'sync; poweroff' over SSH before cutting power but ideally it should have a power loss warning system and a supercap to let it process such a warning.
+
+
 # Confirmed
 
 ## Network access
@@ -311,6 +318,7 @@ Files seen in the last few months:
     https://package.wecreat.com/lumos-pro/8485125a04e7c20e6015f91600a8a790.tar.gz
     https://package.wecreat.com/lumos-pro/e9d4ee2b7800910d546a489ea29e20ab.tar.gz
     https://package.wecreat.com/lumos-pro/0d2c9943cd692dbfa616e01f96b6832c.tar.gz
+    https://package.wecreat.com/lumos-pro/c4f74f9416f13d197c9f68bf43d21c17.tar.gz
 
 ```
 After flashing firmware with manual_firmware_update.py, a power cycle is needed for the machine to report íts new versions. Careful here, brickage likely not impossible.
