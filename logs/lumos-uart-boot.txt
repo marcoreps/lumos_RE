@@ -1,0 +1,972 @@
+[217]HELLO! BOOT0 is starting!
+[220]BOOT0 commit : 4d16602
+M/TC: OP-TEE version: 963b7e95 (gcc version 5.3.1 20160412 (Linaro GCC 5.3-2016.05)) #1 Wed Jul 28 12:51:52 UTC 2021 arm
+
+
+U-Boot 2018.05-gb7dc4588-dirty (Nov 24 2025 - 16:08:49 +0800) Allwinner Technology
+
+[00.407]CPU:   Allwinner Family
+[00.410]Model: sun8iw20
+[00.412]DRAM:  128 MiB
+[00.415]Relocation Offset is: 04ece000
+[00.444]secure enable bit: 0
+[00.447]CPU=1008 MHz,PLL6=600 Mhz,AHB=200 Mhz, APB1=100Mhz  MBus=300Mhz
+[00.453]gic: sec monitor mode
+[00.456]flash init start
+[00.458]workmode = 0,storage type = 0
+sspi->base_addr = 0x4025000, the SPI control register:
+[VER] 0x4025000 = 0x00010001, [GCR] 0x4025004 = 0x00000083, [TCR] 0x4025008 = 0x00000184
+[ICR] 0x4025010 = 0x00000f00, [ISR] 0x4025014 = 0x00000032, [FCR] 0x4025018 = 0x00200020
+[FSR] 0x402501c = 0x00000000, [WCR] 0x4025020 = 0x00000000, [CCR] 0x4025024 = 0x00000002
+[SDC] 0x4025028 = 0x00002000, [BCR] 0x4025030 = 0x00000000, [TCR] 0x4025034 = 0x00000000
+[BCC] 0x4025038 = 0x20000000, [DMA] 0x4025088 = 0x000000e5
+
+[00.505]sunxi-spinand-phy: not detect any munufacture from id table
+[00.511]sunxi-spinand-phy: get spi-nand Model from fdt fail
+[00.516]sunxi-spinand-phy: get phy info from fdt fail
+
+device nand0 <nand>, # parts = 4
+ #: name		size		offset		mask_flags
+ 0: boot0               0x00100000	0x00000000	1
+ 1: uboot               0x00300000	0x00100000	1
+ 2: secure_storage      0x00100000	0x00400000	1
+ 3: sys                 0x0fb00000	0x00500000	0
+
+active partition: nand0,0 - (boot0) 0x00100000 @ 0x00000000
+
+defaults:
+mtdids  : nand0=nand
+mtdparts: mtdparts=nand:1024k@0(boot0)ro,3072k@1048576(uboot)ro,1024k@4194304(secure_storage)ro,-(sys)
+[00.694]ubi0: attaching mtd4
+[00.896]ubi0: scanning is finished
+[00.903]ubi0: attached mtd4 (name "sys", size 251 MiB)
+[00.907]ubi0: PEB size: 262144 bytes (256 KiB), LEB size: 258048 bytes
+[00.913]ubi0: min./max. I/O unit sizes: 4096/4096, sub-page size 2048
+[00.920]ubi0: VID header offset: 2048 (aligned 2048), data offset: 4096
+[00.926]ubi0: good PEBs: 999, bad PEBs: 5, corrupted PEBs: 0
+[00.931]ubi0: user volume: 10, internal volumes: 1, max. volumes count: 128
+[00.938]ubi0: max/mean erase counter: 19/9, WL threshold: 4096, image sequence number: 0
+[00.946]ubi0: available PEBs: 0, total reserved PEBs: 999, PEBs reserved for bad PEB handling: 35
+[00.954]sunxi flash init ok
+[00.957]line:703 init_clocks
+[00.960]drv_disp_init
+request pwm success, pwm0:pwm0:0x2000c00.
+[00.973]drv_disp_init finish
+[00.976]boot_gui_init:start
+[00.979]set disp.dev2_output_type fail. using defval=0
+[01.005]boot_gui_init:finish
+[01.238]LCD open finish
+partno erro : can't find partition bootloader
+54 bytes read in 1 ms (52.7 KiB/s)
+[01.305]bmp_name=bootlogo.bmp size 38454
+38454 bytes read in 2 ms (18.3 MiB/s)
+[01.431]Loading Environment from SUNXI_FLASH... OK
+[01.453]Item0 (Map) magic is bad
+secure storage read widevine fail
+[01.459]secure storage read widevine fail with:-1
+secure storage read ec_key fail
+[01.466]secure storage read ec_key fail with:-1
+secure storage read ec_cert1 fail
+[01.473]secure storage read ec_cert1 fail with:-1
+secure storage read ec_cert2 fail
+[01.481]secure storage read ec_cert2 fail with:-1
+secure storage read ec_cert3 fail
+[01.488]secure storage read ec_cert3 fail with:-1
+secure storage read rsa_key fail
+[01.495]secure storage read rsa_key fail with:-1
+secure storage read rsa_cert1 fail
+[01.503]secure storage read rsa_cert1 fail with:-1
+secure storage read rsa_cert2 fail
+[01.511]secure storage read rsa_cert2 fail with:-1
+secure storage read rsa_cert3 fail
+[01.518]secure storage read rsa_cert3 fail with:-1
+[01.523]usb burn from boot
+delay time 0
+weak:otg_phy_config
+[01.534]usb prepare ok
+[01.731]usb sof ok
+[01.733]usb probe ok
+[01.735]usb setup ok
+set address 0x1d
+set address 0x1d ok
+[04.739]do_burn_from_boot usb : have no handshake
+List file under ULI/factory
+** Unrecognized filesystem type **
+[04.760]update bootcmd
+[04.772]change working_fdt 0x43e8de70 to 0x43e6de70
+[04.790]update dts
+Hit any key to stop autoboot:  0 
+[04.985]no vendor_boot partition is found
+Android's image name: r528-evb3hmi
+[04.997]Starting kernel ...
+
+/dev/by-name/UDISK already format by ubifs
+Please press Enter to activate this console.
+kmodloader done
+
+
+
+BusyBox v1.27.2 () built-in shell (ash)
+
+ _____  _              __     _
+|_   _||_| ___  _ _   |  |   |_| ___  _ _  _ _
+  | |   _ |   ||   |  |  |__ | ||   || | ||_'_|
+  | |  | || | || _ |  |_____||_||_|_||___||_,_|
+  |_|  |_||_|_||_|_|  Tina is Based on OpenWrt!
+ ----------------------------------------------
+ Tina Linux (Neptune, 6191F77D)
+ ----------------------------------------------
+mbtc@TinaLinux:/# Trying to connect to SWUpdate...
+id
+uid=0(mbtc) gid=0(root)
+mbtc@TinaLinux:/# uname -a
+Linux TinaLinux 5.4.61 #1555 SMP PREEMPT Thu Dec 25 08:43:00 UTC 2025 armv7l GNU/Linux
+mbtc@TinaLinux:/# cat /proc/mounts
+/dev/root / squashfs ro,noatime 0 0
+devtmpfs /dev devtmpfs rw,relatime,size=48080k,nr_inodes=12020,mode=755 0 0
+proc /proc proc rw,nosuid,nodev,noexec,noatime 0 0
+sysfs /sys sysfs rw,nosuid,nodev,noexec,noatime 0 0
+cgroup /sys/fs/cgroup cgroup rw,nosuid,nodev,noexec,relatime,blkio,devices,freezer,net_cls,pids 0 0
+tmpfs /tmp tmpfs rw,nosuid,nodev,noatime 0 0
+devpts /dev/pts devpts rw,nosuid,noexec,relatime,mode=600,ptmxmode=000 0 0
+debugfs /sys/kernel/debug debugfs rw,noatime 0 0
+mbtc@TinaLinux:/# df -h
+Filesystem                Size      Used Available Use% Mounted on
+/dev/root                 9.5M      9.5M         0 100% /
+devtmpfs                 47.0M         0     47.0M   0% /dev
+tmpfs                    51.5M      1.1M     50.4M   2% /tmp
+mbtc@TinaLinux:/# df -i
+df: invalid option -- 'i'
+BusyBox v1.27.2 () multi-call binary.
+
+Usage: df [-PkmhT] [FILESYSTEM]...
+
+Print filesystem usage statistics
+
+	-P	POSIX output format
+	-k	1024-byte blocks (default)
+	-m	1M-byte blocks
+	-h	Human readable (e.g. 1K 243M 2G)
+	-T	Print filesystem type
+mbtc@TinaLinux:/# free
+             total       used       free     shared    buffers     cached
+Mem:        105376      52168      53208       1104       6788      19648
+-/+ buffers/cache:      25732      79644
+Swap:            0          0          0
+mbtc@TinaLinux:/# ps w
+  PID USER       VSZ STAT COMMAND
+    1 mbtc      2804 S    /sbin/procd
+    2 mbtc         0 SW   [kthreadd]
+    3 mbtc         0 IW<  [rcu_gp]
+    4 mbtc         0 IW<  [rcu_par_gp]
+    5 mbtc         0 IW   [kworker/0:0-ubi]
+    6 mbtc         0 IW<  [kworker/0:0H-kb]
+    7 mbtc         0 IW   [kworker/u4:0-ev]
+    8 mbtc         0 IW<  [mm_percpu_wq]
+    9 mbtc         0 SW   [ksoftirqd/0]
+   10 mbtc         0 IW   [rcu_preempt]
+   11 mbtc         0 SW   [migration/0]
+   12 mbtc         0 SW   [cpuhp/0]
+   13 mbtc         0 PW   [cpuhp/1]
+   14 mbtc         0 PW   [migration/1]
+   15 mbtc         0 PW   [ksoftirqd/1]
+   16 mbtc         0 IW   [kworker/1:0]
+   17 mbtc         0 IW<  [kworker/1:0H]
+   18 mbtc         0 SW   [kdevtmpfs]
+   19 mbtc         0 IW<  [netns]
+   20 mbtc         0 IW   [kworker/u4:1-ev]
+   21 mbtc         0 SW   [rcu_tasks_kthre]
+   22 mbtc         0 IW   [kworker/0:1-eve]
+  525 mbtc         0 SW   [oom_reaper]
+  526 mbtc         0 IW<  [writeback]
+  528 mbtc         0 SW   [kcompactd0]
+  559 mbtc         0 IW<  [kblockd]
+  560 mbtc         0 IW<  [blkcg_punt_bio]
+  711 mbtc         0 SW   [watchdogd]
+  808 mbtc         0 IW<  [cfg80211]
+  813 mbtc         0 SW   [spi0]
+  818 mbtc         0 SW   [spi1]
+  829 mbtc         0 SW   [kswapd0]
+ 1076 mbtc         0 SW   [irq/42-mmc0]
+ 1078 mbtc         0 SW   [irq/195-4020000]
+ 1079 mbtc         0 SW   [irq/43-mmc1]
+ 1081 mbtc         0 IW   [kworker/0:2-ubi]
+ 1117 mbtc         0 IW<  [mmc_complete]
+ 1123 mbtc         0 IW   [kworker/0:3-eve]
+ 1125 mbtc         0 IW<  [kworker/0:1H-kb]
+ 1137 mbtc         0 IW<  [ipv6_addrconf]
+ 1138 mbtc         0 SW<  [krfcommd]
+ 1153 mbtc         0 IW   [kworker/0:4-eve]
+ 1154 mbtc         0 IW   [kworker/0:5-rcu]
+ 1184 mbtc         0 SW   [ksdioirqd/mmc1]
+ 1185 mbtc         0 IW<  [kworker/u5:0-hc]
+ 1204 mbtc         0 SW   [ubi_bgt0d]
+ 1396 mbtc      2084 S    /sbin/ubusd
+ 1410 mbtc      3132 S    /bin/ash --login
+ 1411 mbtc      1988 S    /sbin/askfirst /bin/ash --login
+ 1508 mbtc      2680 S    /sbin/udevd -d
+ 1510 mbtc      2236 S    /sbin/logd -S 64
+ 1511 mbtc      2288 S    /sbin/logread -f -F /tmp/.lastlog -p /var/run/logread.1.pid -S 512
+ 1516 nobody    2668 S    avahi-daemon: running [linux.local]
+ 1561 mbtc         0 IW<  [kworker/0:2H-kb]
+ 1593 mbtc         0 IW   [kworker/u4:2-ev]
+ 1666 mbtc      2336 S    /sbin/netifd
+ 1684 mbtc         0 SW   [RTW_XMIT_THREAD]
+ 1686 mbtc         0 SW   [RTW_RECV_THREAD]
+ 1687 mbtc         0 SW   [RTW_CMD_THREAD]
+ 1688 mbtc         0 SW   [RTWHALXT]
+ 1689 mbtc         0 SW   [RTWHALXT]
+ 1694 mbtc      3008 S    /usr/sbin/udhcpd /etc/config/udhcpd.conf
+ 1727 mbtc      3008 S    udhcpc -i wlan0
+ 1729 mbtc      2020 S    /usr/bin/vsftpd
+ 1748 mbtc         0 IW   [kworker/u4:3-ev]
+ 1826 mbtc      1692 S    rtk_hciattach -n -s 115200 /dev/ttyS1 rtk_h5
+ 1883 mbtc         0 IW<  [kworker/u5:1-hc]
+ 1884 mbtc         0 IW<  [kworker/u5:2-hc]
+ 2069 mbtc     16400 S    /usr/bin/bt_gatt_mbtc
+ 2331 mbtc      1740 S    /sbin/swupdate-progress -w
+ 2526 mbtc      3132 R    ps w
+mbtc@TinaLinux:/# ls -la /mnt/SDCARD /mnt/SDCARD/data /overlay
+ls: /mnt/SDCARD/data: No such file or directory
+/mnt/SDCARD:
+drwxrwxr-x    6 mbtc     root            72 Apr 11  2024 .
+drwxrwxr-x    6 mbtc     root            68 Apr 11  2024 ..
+drwxrwxr-x    2 mbtc     root             3 Apr 11  2024 configs
+drwxrwxr-x    2 mbtc     root             3 Apr 11  2024 framing
+drwxrwxr-x    2 mbtc     root             3 Apr 11  2024 printing
+drwxrwxr-x    2 mbtc     root             3 Apr 11  2024 tmp
+
+/overlay:
+drwxr-xr-x    2 mbtc     root             3 Apr 11  2024 .
+drwxr-xr-x   16 mbtc     root           225 Apr 11  2024 ..
+mbtc@TinaLinux:/# ls -l /dev/mmcblk*
+brw-------    1 mbtc     root      179,   0 Jan  1 08:00 /dev/mmcblk0
+brw-------    1 mbtc     root      179,   1 Jan  1 08:00 /dev/mmcblk0p1
+brw-------    1 mbtc     root      179,   2 Jan  1 08:00 /dev/mmcblk0p2
+mbtc@TinaLinux:/# cat /etc/mbtc/version.json
+{
+    "ver_app":"1.8.12",
+    "ver_mcu1":"1.0.0",
+    "ver_mcu2":"1.0.1",
+    "name":"lumos-pro",
+    "host":"wecreat",
+    "wlan0":"127.0.0.1",
+    "laser_id":"0",
+    "dev_type":"LU25xx"
+}mbtc@TinaLinux:/# logread | tail -80
+1970-01-01 08:01:49.855 user.notice procd: uci: Entry not found
+1970-01-01 08:01:49.855 user.notice procd: this file has been obsoleted. please call "/sbin/block mount" directly
+1970-01-01 08:01:49.855 kern.alert kernel: [    9.339199] handle_ep0: ep0 setup end
+1970-01-01 08:01:49.855 kern.alert kernel: [    9.339466] handle_ep0: ep0 setup end
+1970-01-01 08:01:49.855 daemon.info avahi-daemon[1516]: Joining mDNS multicast group on interface usb0.IPv4 with address 192.168.42.1.
+1970-01-01 08:01:49.855 daemon.info avahi-daemon[1516]: New relevant interface usb0.IPv4 for mDNS.
+1970-01-01 08:01:49.855 daemon.info avahi-daemon[1516]: Registering new address record for 192.168.42.1 on usb0.IPv4.
+1970-01-01 08:01:49.856 kern.alert kernel: [   10.507115] handle_ep0: ep0 setup end
+1970-01-01 08:01:49.856 kern.alert kernel: [   10.507782] handle_ep0: ep0 setup end
+1970-01-01 08:01:49.856 kern.alert kernel: [   10.508099] handle_ep0: ep0 setup end
+1970-01-01 08:01:49.856 user.notice procd: cat: can't open '/mnt/UDISK/wifi.txt': No such file or directory
+1970-01-01 08:01:49.856 kern.alert kernel: [   10.664203] handle_ep0: ep0 setup end
+1970-01-01 08:01:49.856 user.notice procd: mac_from web:4C:43:31:42:1D:4F
+1970-01-01 08:01:49.856 user.notice procd: kill: you need to specify whom to kill
+1970-01-01 08:01:49.856 user.notice procd: /etc/rc.local: line 33: can't create /etc/hostname: Read-only file system
+1970-01-01 08:01:49.856 user.notice procd: udhcpc: started, v1.27.2
+1970-01-01 08:01:49.856 user.notice procd: chmod: /usr/bin/vsftpd: Read-only file system
+1970-01-01 08:01:49.856 kern.warn kernel: [   11.282679] sunxi-rfkill soc@3000000:rfkill@0: block state already is 1
+1970-01-01 08:01:49.856 user.notice procd: udhcpc: sending discover
+1970-01-01 08:01:49.856 kern.info kernel: [   11.313968]  mmcblk0: p1 p2
+1970-01-01 08:01:49.856 daemon.info avahi-daemon[1516]: Joining mDNS multicast group on interface usb0.IPv6 with address fe80::b43f:47ff:fec4:ea1a.
+1970-01-01 08:01:49.856 daemon.info avahi-daemon[1516]: New relevant interface usb0.IPv6 for mDNS.
+1970-01-01 08:01:49.856 daemon.info avahi-daemon[1516]: Registering new address record for fe80::b43f:47ff:fec4:ea1a on usb0.*.
+1970-01-01 08:01:49.857 kern.info kernel: [   12.299197] sunxi-rfkill soc@3000000:rfkill@0: set block: 0
+1970-01-01 08:01:49.857 kern.info kernel: [   12.309526] sunxi-rfkill soc@3000000:rfkill@0: bt power on success
+1970-01-01 08:01:49.857 kern.alert kernel: [   12.444195] handle_ep0: ep0 setup end
+1970-01-01 08:01:49.857 user.notice procd: ======wlan0 up successed!======
+1970-01-01 08:01:49.857 user.notice procd: change the default ip address 192.168.1.1
+1970-01-01 08:01:49.857 user.notice procd: ifconfig: SIOCSIFADDR: No such device
+1970-01-01 08:01:49.857 user.notice procd: udhcpc: sending discover
+1970-01-01 08:01:49.857 kern.info kernel: [   14.499140]  mmcblk0: p1 p2
+1970-01-01 08:01:49.857 user.notice procd: terminate called after throwing an instance of 'spdlog::spdlog_ex'
+1970-01-01 08:01:49.857 user.notice procd:   what():  Failed opening file /overlay/work/logfile.txt for writing: No such file or directory
+1970-01-01 08:01:49.857 daemon.info bluetoothd[1934]: Bluetooth daemon 5.54
+1970-01-01 08:01:49.857 daemon.err bluetoothd[1934]: Unable to get on D-Bus
+1970-01-01 08:01:49.857 user.notice procd: udhcpc: sending discover
+1970-01-01 08:01:49.857 user.notice procd: chmod: /etc/mbtc/restart.sh: Read-only file system
+1970-01-01 08:01:49.857 user.notice procd: /etc/rc.local: line 47: /etc/mbtc/restart.sh: Permission denied
+1970-01-01 08:01:49.857 authpriv.info dropbear[2122]: Early exit: Bad buf_getptr
+1970-01-01 08:01:49.857 user.notice procd: Bluetooth init has been completed!!
+1970-01-01 08:01:49.858 user.notice procd: grep: RUNNING: No such file or directory
+1970-01-01 08:01:49.858 daemon.err block: Unkown action change
+1970-01-01 08:01:49.858 user.notice procd: chmod: /etc/mbtc/sdcard_format.sh: Read-only file system
+1970-01-01 08:01:49.858 user.notice procd: /etc/rc.local: line 50: /etc/mbtc/sdcard_format.sh: Permission denied
+1970-01-01 08:01:49.858 user.notice procd: 发现现有的host-name配置，正在替换为指定值...
+1970-01-01 08:01:49.858 user.notice procd: sed: can't create temp file '/etc/avahi/avahi-daemon.confJv2ZVR': Read-only file system
+1970-01-01 08:01:49.858 user.notice procd: sed: can't create temp file '/etc/config/systemzRU2qS': Read-only file system
+1970-01-01 08:01:49.858 user.notice procd: swu_param: ####
+1970-01-01 08:01:49.858 user.notice procd: swu_software: ####
+1970-01-01 08:01:49.858 user.notice procd: swu_mode: ####
+1970-01-01 08:01:49.858 user.notice procd: swu_version: ##2.2.5##
+1970-01-01 08:01:49.858 user.notice procd: current version is 2.2.5
+1970-01-01 08:01:49.858 user.notice procd: no swupdate_cmd to run, wait for next swupdate
+1970-01-01 08:01:49.858 daemon.info procd: - init complete -
+1970-01-01 08:01:49.858 daemon.err block: Unkown action change
+1970-01-01 08:01:49.858 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.859 daemon.err block: Unkown action change
+1970-01-01 08:01:49.860 authpriv.info dropbear[2513]: Early exit: Bad buf_getptr
+1970-01-01 08:01:49.860 authpriv.info dropbear[2514]: Early exit: Bad buf_getptr
+1970-01-01 08:01:49.860 kern.info kernel: [   31.850957] usb0-vbus: disabling
+1970-01-01 08:01:49.860 authpriv.info dropbear[2515]: Early exit: Bad buf_getptr
+1970-01-01 08:01:49.860 authpriv.info dropbear[2517]: Early exit: Bad buf_getptr
+1970-01-01 08:01:49.860 authpriv.info dropbear[2519]: Early exit: Bad buf_getptr
+1970-01-01 08:01:49.860 daemon.info procd: Instance dropbear::instance1 s in a crash loop 6 crashes, 0 seconds since last crash
+mbtc@TinaLinux:/# dmesg | tail -80
+[    3.564396] 00001ac0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564406] 00001ae0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564416] 00001b00: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564426] 00001b20: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564435] 00001b40: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564445] 00001b60: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564455] 00001b80: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564464] 00001ba0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564474] 00001bc0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564484] 00001be0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564494] 00001c00: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564503] 00001c20: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564513] 00001c40: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564523] 00001c60: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564532] 00001c80: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564542] 00001ca0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564552] 00001cc0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564561] 00001ce0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564571] 00001d00: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564581] 00001d20: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564590] 00001d40: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564600] 00001d60: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564610] 00001d80: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564619] 00001da0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564629] 00001dc0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564639] 00001de0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564648] 00001e00: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564658] 00001e20: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564668] 00001e40: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564677] 00001e60: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564687] 00001e80: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564697] 00001ea0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564707] 00001ec0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564716] 00001ee0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564726] 00001f00: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564736] 00001f20: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564745] 00001f40: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564755] 00001f60: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564765] 00001f80: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564774] 00001fa0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564784] 00001fc0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564794] 00001fe0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000  ................................
+[    3.564804] UBIFS error (ubi0:9 pid 1249): ubifs_recover_leb: LEB 5 scanning failed
+[    3.564937] UBIFS (ubi0:9): background thread "ubifs_bgt0_9" stops
+[    3.566003] block: extroot: mounting /dev/by-name/UDISK (ubifs) on /tmp/extroot/overlay failed: -1 (Unknown error -1)
+[    3.576360] procd: - early -
+[    3.576494] procd: - watchdog -
+[    3.609454] handle_ep0: ep0 setup end
+[    3.610894] handle_ep0: ep0 setup end
+[    3.898059] procd: - watchdog -
+[    3.898318] procd: - ubus -
+[    3.898985] procd (1): /proc/1396/oom_adj is deprecated, please use /proc/1396/oom_score_adj instead.
+[    4.203746] procd: - init -
+[    5.404223] handle_ep0: ep0 setup end
+[    5.429492] fuse: init (API version 7.31)
+[    5.649128] udevd[1457]: starting version 3.2.9
+[    5.879170] udevd[1457]: specified group 'tty' unknown
+[    5.879398] udevd[1457]: specified group 'dialout' unknown
+[    5.879490] udevd[1457]: specified group 'kmem' unknown
+[    5.879573] udevd[1457]: specified group 'input' unknown
+[    5.879655] udevd[1457]: specified group 'video' unknown
+[    5.879932] udevd[1457]: specified group 'lp' unknown
+[    5.880055] udevd[1457]: specified group 'disk' unknown
+[    5.880131] udevd[1457]: specified group 'cdrom' unknown
+[    5.880256] udevd[1457]: specified group 'tape' unknown
+[    6.184806] udevd[1508]: starting eudev-3.2.9
+[    6.480582] xt_time: kernel timezone is -0000
+[    9.339199] handle_ep0: ep0 setup end
+[    9.339466] handle_ep0: ep0 setup end
+[   10.507115] handle_ep0: ep0 setup end
+[   10.507782] handle_ep0: ep0 setup end
+[   10.508099] handle_ep0: ep0 setup end
+[   10.664203] handle_ep0: ep0 setup end
+[   11.282679] sunxi-rfkill soc@3000000:rfkill@0: block state already is 1
+[   11.313968]  mmcblk0: p1 p2
+[   12.299197] sunxi-rfkill soc@3000000:rfkill@0: set block: 0
+[   12.309526] sunxi-rfkill soc@3000000:rfkill@0: bt power on success
+[   12.444195] handle_ep0: ep0 setup end
+[   14.499140]  mmcblk0: p1 p2
+[   31.850957] usb0-vbus: disabling
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# echo "=== UBI volumes ==="
+=== UBI volumes ===
+mbtc@TinaLinux:/# for v in /sys/class/ubi/ubi0_[0-9]*; do
+>     [ -r "$v/name" ] || continue
+>     echo -n "${v##*/}: "
+>     cat "$v/name"
+>     echo -n "  eraseblocks: "
+>     cat "$v/reserved_ebs"
+> done
+ns ubi0_0: ==="
+cat /proc/mtd
+
+echo "=== UDISK mapping ==="
+ls -l /dev/by-name/UDISKmbr
+  eraseblocks:  /dev/ubi0_9
+
+echo1
+ubi0_1:  "=== Available recovery tools ==boot-resource
+="
+for  eraseblocks:  cmd in ubinfo nanddump mtd_debug nc; do
+    command -v "$cmd" || true
+1
+ubi0_2: env
+  eraseblocks: 1
+ubi0_3: env-redund
+  eraseblocks: 1
+ubi0_4: boot
+  eraseblocks: 25
+ubi0_5: rootfs
+  eraseblocks: 81
+ubi0_6: dsp0
+  eraseblocks: 2
+ubi0_7: private
+  eraseblocks: 4
+ubi0_8: recovery
+  eraseblocks: 32
+ubi0_9: UDISK
+  eraseblocks: 812
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# echo "=== Flash partitions ==="
+=== Flash partitions ===
+mbtc@TinaLinux:/# cat /proc/mtd
+dev:    size   erasesize  name
+mtd0: 00100000 00040000 "boot0"
+mtd1: 00300000 00040000 "uboot"
+mtd2: 00100000 00040000 "secure_storage"
+mtd3: 0fb00000 00040000 "sys"
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# echo "=== UDISK mapping ==="
+=== UDISK mapping ===
+mbtc@TinaLinux:/# ls -l /dev/by-name/UDISK /dev/ubi0_9
+lrwxrwxrwx    1 mbtc     root            11 Jan  1 08:00 /dev/by-name/UDISK -> /dev/ubi0_9
+crw-------    1 mbtc     root      246,  10 Jan  1 08:00 /dev/ubi0_9
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# echo "=== Available recovery tools ==="
+=== Available recovery tools ===
+mbtc@TinaLinux:/# for cmd in ubinfo nanddump mtd_debug nc; do
+>     command -v "$cmd" || true
+> done
+/usr/sbin/ubinfo
+/usr/bin/nc
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# ubinfo -d 0 -n 9
+Volume ID:   9 (on ubi0)
+Type:        dynamic
+Alignment:   1
+Size:        812 LEBs (209534976 bytes, 199.8 MiB)
+State:       OK
+Name:        UDISK
+Character device major/minor: 246:10
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# echo "=== Test read ==="
+=== Test read ===
+mbtc@TinaLinux:/# dd if=/dev/ubi0_9 of=/dev/null bs=4096 count=1
+1+0 records in
+1+0 records out
+mbtc@TinaLinux:/# cat /dev/ubi0_9 | nc 192.168.42.2 9000
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# dmesg | grep -iE 'ubifs|corrupt|recover|bad node|scan'
+[    3.564804] UBIFS error (ubi0:9 pid 1249): ubifs_recover_leb: LEB 5 scanning failed
+[    3.564937] UBIFS (ubi0:9): background thread "ubifs_bgt0_9" stops
+[    3.566003] block: extroot: mounting /dev/by-name/UDISK (ubifs) on /tmp/extroot/overlay failed: -1 (Unknown error -1)
+mbtc@TinaLinux:/# echo "=== Identity and UBI volume ==="
+=== Identity and UBI volume ===
+mbtc@TinaLinux:/# id
+uid=0(mbtc) gid=0(root)
+mbtc@TinaLinux:/# ls -l /dev/ubi0_9 /dev/by-name/UDISK
+at /sys/class/ubi/ubi0_9/name
+
+for p in type reserved_ebs usable_eb_size; do
+    [ -r /sylrwxrwxrwx    1 mbtc     root            11 Jan  1 08:00 /dev/by-name/UDISK -> /dev/ubi0_9
+crw-------    1 mbtc     root      246,  10 Jan  1 08:00 /dev/ubi0_9
+smbtc@TinaLinux:/# cat /sys/class/ubi/ubi0_9/name
+UDISK
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# for p in type reserved_ebs usable_eb_size; do
+>     [ -r /sys/class/ubi/ubi0_9/$p ] &&
+>         echo "$p: $(cat /sys/class/ubi/ubi0_9/$p)"
+> done
+
+cat /proc/mounts | greptype: dynamic
+ -E 'ubi|overlay|extroot|UDISK'
+
+ereserved_ebs: 812
+cho "=== Available utilities ==="
+for cmd in ubiupdatevol ubinfousable_eb_size: 258048
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# echo "=== Mounts ==="
+=== Mounts ===
+mbtc@TinaLinux:/# cat /proc/mounts | grep -E 'ubi|overlay|extroot|UDISK'
+mmand -v "$cmd" || true
+done
+
+echo "=== Memory ==="
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# echo "=== Available utilities ==="
+=== Available utilities ===
+mbtc@TinaLinux:/# for cmd in ubiupdatevol ubinfo busybox nc sha256sum; do
+>     command -v "$cmd" || true
+> done
+/usr/sbin/ubiupdatevol
+/usr/sbin/ubinfo
+/bin/busybox
+/usr/bin/nc
+/usr/bin/sha256sum
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# echo "=== Memory ==="
+=== Memory ===
+mbtc@TinaLinux:/# free
+             total       used       free     shared    buffers     cached
+Mem:        105376      52580      52796       1104       6788      19704
+-/+ buffers/cache:      26088      79288
+Swap:            0          0          0
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# echo "=== Identity and UBI volume ==="
+=== Identity and UBI volume ===
+mbtc@TinaLinux:/# id
+uid=0(mbtc) gid=0(root)
+mbtc@TinaLinux:/# ls -l /dev/ubi0_9 /dev/by-name/UDISK
+cat /sys/class/ubi/ubi0_9/name
+
+for p in type reserved_ebs usable_eb_size; do
+    [ -r /syslrwxrwxrwx    1 mbtc     root            11 Jan  1 08:00 /dev/by-name/UDISK -> /dev/ubi0_9
+crw-------    1 mbtc     root      246,  10 Jan  1 08:00 /dev/ubi0_9
+mbtc@TinaLinux:/# cat /sys/class/ubi/ubi0_9/name
+UDISK
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# for p in type reserved_ebs usable_eb_size; do
+>     [ -r /sys/class/ubi/ubi0_9/$p ] &&
+>         echo "$p: $(cat /sys/class/ubi/ubi0_9/$p)"
+> done
+c/mounts | greptype: dynamic
+ -E 'ubi|overlay|extroot|UDISK'
+
+echo "=== Areserved_ebs: 812
+vailable utilities ==="
+for cmd in ubiupdatevol ubinfo busybox nusable_eb_size: 258048
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# echo "=== Mounts ==="
+=== Mounts ===
+mbtc@TinaLinux:/# cat /proc/mounts | grep -E 'ubi|overlay|extroot|UDISK'
+c sha256sum; do
+    command -v "$cmd" || true
+done
+
+echo "=== Memory ==="
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# echo "=== Available utilities ==="
+=== Available utilities ===
+mbtc@TinaLinux:/# for cmd in ubiupdatevol ubinfo busybox nc sha256sum; do
+>     command -v "$cmd" || true
+> done
+/usr/sbin/ubiupdatevol
+/usr/sbin/ubinfo
+/bin/busybox
+/usr/bin/nc
+/usr/bin/sha256sum
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# echo "=== Memory ==="
+=== Memory ===
+mbtc@TinaLinux:/# free
+             total       used       free     shared    buffers     cached
+Mem:        105376      52580      52796       1104       6788      19704
+-/+ buffers/cache:      26088      79288
+Swap:            0          0          0
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# echo UART_OK
+UART_OK
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# echo UART_OK
+mbtc@TinaLinux:/# free
+mbtc@TinaLinux:/# echo "=== Memory ==="
+=== Memory ===
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# ubiupdatevol --help
+ubiupdatevol version 1.5.2 - a tool to write data to UBI volumes.
+
+Usage: ubiupdatevol <UBI volume node file name> [-t] [-s <size>] [-f] [-h] [-V] [--truncate]
+			[--size=<size>] [--fifo] [--help] [--version] <image file>
+
+Example 1: ubiupdatevol /dev/ubi0_1 fs.img - write file "fs.img" to UBI volume /dev/ubi0_1
+Example 2: ubiupdatevol /dev/ubi0_1 -t - wipe out UBI volume /dev/ubi0_1
+Example 3: ubiupdatevol /dev/ubi0_1 -f - make fifo /dev/ubi0_1_fifo to update UBI volume /dev/ubi0_1
+
+-t, --truncate             truncate volume (wipe it out)
+-s, --size=<bytes>         bytes to read from input
+    --skip=<bytes>         leading bytes to skip from input
+-f, --fifo                 use fifo to update
+-h, --help                 print help message
+-V, --version              print program version
+mbtc@TinaLinux:/# nc --help
+BusyBox v1.27.2 () multi-call binary.
+
+Usage: nc [IPADDR PORT]
+
+Open a pipe to IP:PORT
+mbtc@TinaLinux:/# ip addr show
+1: lo: <LOOPBACK> mtu 65536 qdisc noop qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2: usb0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast qlen 1000
+    link/ether b6:3f:47:c4:ea:1a brd ff:ff:ff:ff:ff:ff
+    inet 192.168.42.1/24 brd 192.168.42.255 scope global usb0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::b43f:47ff:fec4:ea1a/64 scope link 
+       valid_lft forever preferred_lft forever
+3: wlan0: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc mq qlen 1000
+    link/ether 4c:43:31:42:1d:4f brd ff:ff:ff:ff:ff:ff
+4: wlan1: <BROADCAST,MULTICAST> mtu 1500 qdisc noop qlen 1000
+    link/ether 7a:be:81:ce:ae:08 brd ff:ff:ff:ff:ff:ff
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# nc 192.168.42.2 9000 | sha256sum
+c1fce7aeeff842456322a1b2d3494e546636f3e216c035e467f7cd0d04551158  -
+mbtc@TinaLinux:/# sha256sum /dev/ubi0_9
+543e8bac77fb729050de4e184e64bc021e1a72830ddee483d725bfa500c0ce57  /dev/ubi0_9
+mbtc@TinaLinux:/# cat /proc/mounts | grep -E 'ubi0_9|ubi0:UDISK|/overlay'
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# nc 192.168.42.2 9000 | ubiupdatevol /dev/ubi0_9 -s 209534976 -
+
+mbtc@TinaLinux:/# echo $?
+0
+mbtc@TinaLinux:/# sha256sum /dev/ubi0_9
+c1fce7aeeff842456322a1b2d3494e546636f3e216c035e467f7cd0d04551158  /dev/ubi0_9
+mbtc@TinaLinux:/# dmesg | tail -25
+[    5.879170] udevd[1457]: specified group 'tty' unknown
+[    5.879398] udevd[1457]: specified group 'dialout' unknown
+[    5.879490] udevd[1457]: specified group 'kmem' unknown
+[    5.879573] udevd[1457]: specified group 'input' unknown
+[    5.879655] udevd[1457]: specified group 'video' unknown
+[    5.879932] udevd[1457]: specified group 'lp' unknown
+[    5.880055] udevd[1457]: specified group 'disk' unknown
+[    5.880131] udevd[1457]: specified group 'cdrom' unknown
+[    5.880256] udevd[1457]: specified group 'tape' unknown
+[    6.184806] udevd[1508]: starting eudev-3.2.9
+[    6.480582] xt_time: kernel timezone is -0000
+[    9.339199] handle_ep0: ep0 setup end
+[    9.339466] handle_ep0: ep0 setup end
+[   10.507115] handle_ep0: ep0 setup end
+[   10.507782] handle_ep0: ep0 setup end
+[   10.508099] handle_ep0: ep0 setup end
+[   10.664203] handle_ep0: ep0 setup end
+[   11.282679] sunxi-rfkill soc@3000000:rfkill@0: block state already is 1
+[   11.313968]  mmcblk0: p1 p2
+[   12.299197] sunxi-rfkill soc@3000000:rfkill@0: set block: 0
+[   12.309526] sunxi-rfkill soc@3000000:rfkill@0: bt power on success
+[   12.444195] handle_ep0: ep0 setup end
+[   14.499140]  mmcblk0: p1 p2
+[   31.850957] usb0-vbus: disabling
+[  913.656221] handle_ep0: ep0 setup end
+mbtc@TinaLinux:/# mkdir -p /tmp/udisk-verify
+mbtc@TinaLinux:/# mount -t ubifs -o ro ubi0:UDISK /tmp/udisk-verifyls -la /tmp/u
+
+disk-verify
+fy/upper/usr/bin/mbtc_creatermount: invalid option -- 'l'
+
+BusyBox v1.27.2 () multi-call binary.
+
+Usage: mount [OPTIONS] [-o OPT] DEVICE NODE
+
+Mount a filesystem. Filesystem autodetection requires /proc.
+
+	-a		Mount all filesystems in fstab
+	-i		Don't run mount helper
+	-r		Read-only mount
+	-t FSTYPE[,...]	Filesystem type(s)
+	-O OPT		Mount only filesystems with option OPT (-a only)
+-o OPT:
+	loop		Ignored (loop devices are autodetected)
+	[a]sync		Writes are [a]synchronous
+	[no]atime	Disable/enable updates to inode access times
+	[no]diratime	Disable/enable atime updates to directories
+	[no]relatime	Disable/enable atime updates relative to modification time
+	[no]dev		(Dis)allow use of special device files
+	[no]exec	(Dis)allow use of executable files
+	[no]suid	(Dis)allow set-user-id-root programs
+	[r]shared	Convert [recursively] to a shared subtree
+	[r]slave	Convert [recursively] to a slave subtree
+	[r]private	Convert [recursively] to a private subtree
+	[un]bindable	Make mount point [un]able to be bind mounted
+	[r]bind		Bind a file or directory [recursively] to another location
+	move		Relocate an existing mount point
+	remount		Remount a mounted filesystem, changing flags
+	ro		Same as -r
+
+There are filesystem-specific -o flags.
+mbtc@TinaLinux:/# sha256sum /tmp/udisk-verify/upper/usr/bin/mbtc_creater
+sha256sum: can't open '/tmp/udisk-verify/upper/usr/bin/mbtc_creater': No such file or directory
+mbtc@TinaLinux:/# cat /tmp/udisk-verify/upper/etc/mbtc/version.json
+cat: can't open '/tmp/udisk-verify/upper/etc/mbtc/version.json': No such file or directory
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# mount -t ubifs -o ro ubi0:UDISK /tmp/udisk-verify
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# cat /proc/mounts | grep udisk-verify
+ubi0:UDISK /tmp/udisk-verify ubifs ro,relatime,assert=read-only,ubi=0,vol=9 0 0
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# ls -la /tmp/udisk-verify
+drwxr-xr-x    5 mbtc     root           352 Jan  1 08:00 .
+drwxrwxrwt   14 mbtc     root           440 Jan  1 10:02 ..
+drwxr-xr-x    2 mbtc     root           232 Jan  1 08:00 etc
+drwxr-xr-x    5 mbtc     root           600 Jan  1 08:20 upper
+drwxr-xr-x    3 mbtc     root           760 Jan  1 08:00 work
+mbtc@TinaLinux:/# 
+mbtc@TinaLinux:/# sha256sum /tmp/udisk-verify/upper/usr/bin/mbtc_creater
+f7380ac98ecc8d0934ddad3f42bb4d13e2e6bcbad40bc3a839a78e8d1dc0f93c  /tmp/udisk-verify/upper/usr/bin/mbtc_creater
+mbtc@TinaLinux:/# cat /tmp/udisk-verify/upper/etc/mbtc/version.json
+{
+	"ver_mcu1" : "000000",
+	"ver_mcu2" : "000000"
+}mbtc@TinaLinux:/# umount /tmp/udisk-verify
+mbtc@TinaLinux:/# sync
+mbtc@TinaLinux:/# reboot
+mbtc@TinaLinux:/# [33]HELLO! BOOT0 is starting!
+[35]BOOT0 commit : 4d16602
+M/TC: OP-TEE version: 963b7e95 (gcc version 5.3.1 20160412 (Linaro GCC 5.3-2016.05)) #1 Wed Jul 28 12:51:52 UTC 2021 arm
+
+
+U-Boot 2018.05-gb7dc4588-dirty (Nov 24 2025 - 16:08:49 +0800) Allwinner Technology
+
+[00.222]CPU:   Allwinner Family
+[00.225]Model: sun8iw20
+[00.227]DRAM:  128 MiB
+[00.230]Relocation Offset is: 04ece000
+[00.259]secure enable bit: 0
+[00.262]CPU=1008 MHz,PLL6=600 Mhz,AHB=200 Mhz, APB1=100Mhz  MBus=300Mhz
+[00.268]gic: sec monitor mode
+[00.271]flash init start
+[00.273]workmode = 0,storage type = 0
+sspi->base_addr = 0x4025000, the SPI control register:
+[VER] 0x4025000 = 0x00010001, [GCR] 0x4025004 = 0x00000083, [TCR] 0x4025008 = 0x00000184
+[ICR] 0x4025010 = 0x00000f00, [ISR] 0x4025014 = 0x00000032, [FCR] 0x4025018 = 0x00200020
+[FSR] 0x402501c = 0x00000000, [WCR] 0x4025020 = 0x00000000, [CCR] 0x4025024 = 0x00000002
+[SDC] 0x4025028 = 0x00002000, [BCR] 0x4025030 = 0x00000000, [TCR] 0x4025034 = 0x00000000
+[BCC] 0x4025038 = 0x20000000, [DMA] 0x4025088 = 0x000000e5
+
+[00.320]sunxi-spinand-phy: not detect any munufacture from id table
+[00.326]sunxi-spinand-phy: get spi-nand Model from fdt fail
+[00.331]sunxi-spinand-phy: get phy info from fdt fail
+
+device nand0 <nand>, # parts = 4
+ #: name		size		offset		mask_flags
+ 0: boot0               0x00100000	0x00000000	1
+ 1: uboot               0x00300000	0x00100000	1
+ 2: secure_storage      0x00100000	0x00400000	1
+ 3: sys                 0x0fb00000	0x00500000	0
+
+active partition: nand0,0 - (boot0) 0x00100000 @ 0x00000000
+
+defaults:
+mtdids  : nand0=nand
+mtdparts: mtdparts=nand:1024k@0(boot0)ro,3072k@1048576(uboot)ro,1024k@4194304(secure_storage)ro,-(sys)
+[00.509]ubi0: attaching mtd4
+[00.712]ubi0: scanning is finished
+[00.719]ubi0: attached mtd4 (name "sys", size 251 MiB)
+[00.723]ubi0: PEB size: 262144 bytes (256 KiB), LEB size: 258048 bytes
+[00.729]ubi0: min./max. I/O unit sizes: 4096/4096, sub-page size 2048
+[00.736]ubi0: VID header offset: 2048 (aligned 2048), data offset: 4096
+[00.742]ubi0: good PEBs: 999, bad PEBs: 5, corrupted PEBs: 0
+[00.747]ubi0: user volume: 10, internal volumes: 1, max. volumes count: 128
+[00.754]ubi0: max/mean erase counter: 19/9, WL threshold: 4096, image sequence number: 0
+[00.762]ubi0: available PEBs: 0, total reserved PEBs: 999, PEBs reserved for bad PEB handling: 35
+[00.770]sunxi flash init ok
+[00.773]line:703 init_clocks
+[00.776]drv_disp_init
+request pwm success, pwm0:pwm0:0x2000c00.
+[00.789]drv_disp_init finish
+[00.792]boot_gui_init:start
+[00.795]set disp.dev2_output_type fail. using defval=0
+[00.821]boot_gui_init:finish
+[01.054]LCD open finish
+partno erro : can't find partition bootloader
+54 bytes read in 1 ms (52.7 KiB/s)
+[01.121]bmp_name=bootlogo.bmp size 38454
+38454 bytes read in 2 ms (18.3 MiB/s)
+[01.248]Loading Environment from SUNXI_FLASH... OK
+[01.269]Item0 (Map) magic is bad
+secure storage read widevine fail
+[01.275]secure storage read widevine fail with:-1
+secure storage read ec_key fail
+[01.282]secure storage read ec_key fail with:-1
+secure storage read ec_cert1 fail
+[01.289]secure storage read ec_cert1 fail with:-1
+secure storage read ec_cert2 fail
+[01.297]secure storage read ec_cert2 fail with:-1
+secure storage read ec_cert3 fail
+[01.304]secure storage read ec_cert3 fail with:-1
+secure storage read rsa_key fail
+[01.312]secure storage read rsa_key fail with:-1
+secure storage read rsa_cert1 fail
+[01.319]secure storage read rsa_cert1 fail with:-1
+secure storage read rsa_cert2 fail
+[01.327]secure storage read rsa_cert2 fail with:-1
+secure storage read rsa_cert3 fail
+[01.334]secure storage read rsa_cert3 fail with:-1
+[01.339]usb burn from boot
+delay time 0
+weak:otg_phy_config
+[01.350]usb prepare ok
+[01.655]usb sof ok
+[01.657]usb probe ok
+[01.659]usb setup ok
+set address 0x1f
+set address 0x1f ok
+[04.664]do_burn_from_boot usb : have no handshake
+List file under ULI/factory
+** Unrecognized filesystem type **
+[04.685]update bootcmd
+[04.697]change working_fdt 0x43e8de70 to 0x43e6de70
+[04.715]update dts
+Hit any key to stop autoboot:  0 
+[04.911]no vendor_boot partition is found
+Android's image name: r528-evb3hmi
+[04.922]Starting kernel ...
+
+/dev/by-name/UDISK already format by ubifs
+Please press Enter to activate this console.
+kmodloader done
+
+
+
+BusyBox v1.27.2 () built-in shell (ash)
+
+ _____  _              __     _
+|_   _||_| ___  _ _   |  |   |_| ___  _ _  _ _
+  | |   _ |   ||   |  |  |__ | ||   || | ||_'_|
+  | |  | || | || _ |  |_____||_||_|_||___||_,_|
+  |_|  |_||_|_||_|_|  Tina is Based on OpenWrt!
+ ----------------------------------------------
+ Tina Linux (Neptune, 6191F77D)
+ ----------------------------------------------
+mbtc@?:/# Trying to connect to SWUpdate...
+cat /proc/mounts | grep -E 'overlay|ubifs|extroot'
+/dev/by-name/UDISK /overlay ubifs rw,relatime,assert=read-only,ubi=0,vol=9 0 0
+overlayfs:/overlay / overlay rw,noatime,lowerdir=/,upperdir=/overlay/upper,workdir=/overlay/work 0 0
+mbtc@mbtc_421D4F:/# ps | grep mbtc_creater
+ 1712 mbtc      291m S    /usr/bin/mbtc_creater
+ 2595 mbtc      3008 S    grep mbtc_creater
+mbtc@mbtc_421D4F:/# dmesg | grep -iE 'UBIFS error|mounting.*failed|extroot'
+[    3.571582] block: extroot: UUID match (root: 66d79607-6a98a5f6-0617c52d-56008ec7, overlay: 66d79607-6a98a5f6-0617c52d-56008ec7)
+[    3.582234] mount_root: switched to extroot
+mbtc@mbtc_421D4F:/# 
